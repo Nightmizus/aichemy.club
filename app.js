@@ -2,6 +2,7 @@
   "use strict";
   const scene = document.querySelector(".scene");
   const pauseButton = document.getElementById("animation-toggle");
+  const sceneOptions = [...document.querySelectorAll(".mode-option")];
   const navigation = [...document.querySelectorAll(".nav-window")];
   let hideTimer,
     lastMetricsTime = -Infinity,
@@ -19,6 +20,22 @@
     window.AIchemyFurnace.togglePause();
     showControl();
   });
+  function updateSceneOptions() {
+    sceneOptions.forEach((option) =>
+      option.setAttribute(
+        "aria-pressed",
+        String(option.dataset.scene === window.AIchemyScene.mode),
+      ),
+    );
+  }
+  sceneOptions.forEach((option) =>
+    option.addEventListener("click", () => {
+      window.AIchemyScene.setMode(option.dataset.scene);
+      showControl();
+    }),
+  );
+  window.addEventListener("aichemy-scene", updateSceneOptions);
+  updateSceneOptions();
   scene.addEventListener("pointermove", showControl, { passive: true });
   scene.addEventListener("pointerdown", showControl, { passive: true });
   window.addEventListener("keydown", (event) => {
@@ -179,6 +196,12 @@
   const clamp = (value) => Math.max(0, Math.min(1, value));
 
   function captureFloor() {
+    // In 3D mode stardust.js draws the whole hero into this canvas instead.
+    // Switching back raises floorNeedsCapture again through "aichemy-scene".
+    if (window.AIchemyScene.mode === "stardust") {
+      floorNeedsCapture = false;
+      return;
+    }
     if (!furnace.width || !furnace.height) return;
     room.width = furnace.width;
     room.height = furnace.height;
@@ -304,6 +327,11 @@
   });
   window.addEventListener("aichemy-frame", () => {
     if (floorNeedsCapture) scheduleScrollLayout();
+  });
+  window.addEventListener("aichemy-scene", () => {
+    // Returning to the pixel hero needs a fresh floor still in the shared canvas.
+    floorNeedsCapture = true;
+    scheduleScrollLayout();
   });
   motionPreference.addEventListener("change", scheduleScrollLayout);
   // Observe only layout changes; scroll transforms do not resize this element.

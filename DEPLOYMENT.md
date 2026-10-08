@@ -2,9 +2,9 @@
 
 核对日期：2026-09-26。本文供后续接手部署的人或 AI 使用。
 
-**2026-09-26 更新：官网服务器部署已完成，正式域名仍待 ICP 备案及 HTTPS 启用。** 当前版本为 `20260926T081833Z`，`/var/www/aichemy/current` 已指向发布目录，四个域名已解析到 `39.106.77.105`。公网 IP 可预览官网，但域名访问被阿里云备案系统拦截。详细验收、备份和收尾步骤见 [当前部署状态](DEPLOYMENT-STATUS.md)。再次执行本手册前重新检查实际状态；不要重复执行首次安装步骤。
+**2026-10-08 更新：官网服务器部署已完成，正式域名仍待 ICP 备案及 HTTPS 启用。** 当前版本为 `20261008T084617Z`，`/var/www/aichemy/current` 已指向发布目录，四个域名已解析到 `39.106.77.105`。公网 IP 可预览官网，但域名访问被阿里云备案系统拦截。详细验收、备份和收尾步骤见 [当前部署状态](DEPLOYMENT-STATUS.md)。再次执行本手册前重新检查实际状态；不要重复执行首次安装步骤。
 
-本手册的打包步骤已在本地实跑：8 个 HTML 资源引用和 CSS 内字体路径均有效，源码 HTML 未改动；所有 Bash 示例通过语法检查。官网首页、资源 alias、旧登录回跳及保留根路径代理的分工，已用隔离的本地 Nginx 和模拟后端响应检查通过。这些检查不代替服务器上线及正式 HTTPS 验收。
+本手册的打包步骤已在本地实跑：9 个 HTML 资源引用和 CSS 内字体路径均有效，源码 HTML 未改动；所有 Bash 示例通过语法检查。官网首页、资源 alias、旧登录回跳及保留根路径代理的分工，已用隔离的本地 Nginx 和模拟后端响应检查通过。这些检查不代替服务器上线及正式 HTTPS 验收。
 
 ## 1. 目标与现有服务
 
@@ -59,7 +59,7 @@ cd /mizusdev/AIchemy
 npm run check
 ```
 
-只打包 `index.html`、`styles.css`、`app.js`、`furnace.js`、`favicon.svg` 和 `assets/`。当前这些文件合计约 367 KiB。字体授权文件随 `assets/` 保留；不上传 `poster/`、开发服务器、文档、`.git`、`.env` 或备份。新增资产后先检查 `assets/` 中仍全部是允许公开的文件。
+只打包 `index.html`、`styles.css`、`app.js`、`furnace.js`、`stardust.js`、`favicon.svg` 和 `assets/`。当前这些文件合计约 367 KiB。字体授权文件随 `assets/` 保留；不上传 `poster/`、开发服务器、文档、`.git`、`.env` 或备份。新增资产后先检查 `assets/` 中仍全部是允许公开的文件。
 
 ```bash
 set -euo pipefail
@@ -76,7 +76,7 @@ from pathlib import Path
 
 source = Path.cwd()
 staging = Path(os.environ['AICHEMY_STAGING'])
-for name in ('index.html', 'styles.css', 'app.js', 'furnace.js', 'favicon.svg'):
+for name in ('index.html', 'styles.css', 'app.js', 'furnace.js', 'stardust.js', 'favicon.svg'):
     shutil.copy2(source / name, staging / name)
 shutil.copytree(source / 'assets', staging / 'assets')
 index = staging / 'index.html'

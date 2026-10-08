@@ -17,8 +17,19 @@
       type="font/woff2"
       crossorigin
     />
+    <script>
+      // Apply the saved hero style before first paint. ?scene= previews without saving.
+      try {
+        const scene =
+          new URLSearchParams(location.search).get("scene") ||
+          localStorage.getItem("aichemy-scene");
+        if (scene === "stardust")
+          document.documentElement.classList.add("stardust-mode");
+      } catch {}
+    </script>
     <link rel="stylesheet" href="./styles.css?v=blast-5" />
     <script src="./furnace.js?v=blast-5" defer></script>
+    <script src="./stardust.js?v=blast-5" defer></script>
     <script src="./app.js?v=blast-5" defer></script>
   </head>
   <body>
@@ -121,6 +132,34 @@
             ></a
           >
         </nav>
+        <div class="mode-switch" role="group" aria-label="首屏动画样式">
+          <button
+            class="mode-option mode-pixel"
+            type="button"
+            data-scene="pixel"
+            aria-pressed="true"
+            title="像素丹炉"
+          >
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M2 2h5v5H2zM9 2h5v5H9zM2 9h5v5H2zM9 9h5v5H9z" />
+            </svg>
+            PIXEL <span class="sr-only">像素丹炉</span>
+          </button>
+          <button
+            class="mode-option mode-stardust"
+            type="button"
+            data-scene="stardust"
+            aria-pressed="false"
+            title="3D 点阵星核"
+          >
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path
+                d="M7 1h2v2H7zM11 2h2v2h-2zM13 7h2v2h-2zM11 12h2v2h-2zM7 13h2v2H7zM3 12h2v2H3zM1 7h2v2H1zM3 2h2v2H3zM7 7h2v2H7z"
+              />
+            </svg>
+            3D <span class="sr-only">点阵星核</span>
+          </button>
+        </div>
         <div
           class="console-dock"
           aria-label="固定训练仪表"
@@ -246,6 +285,12 @@
         </button>
         <span
           id="animation-status"
+          class="sr-only"
+          role="status"
+          aria-live="polite"
+        ></span>
+        <span
+          id="scene-status"
           class="sr-only"
           role="status"
           aria-live="polite"

@@ -1,6 +1,6 @@
 # AIchemy 部署状态
 
-核对时间：2026-09-29 20:20（Asia/Hong_Kong）。
+核对时间：2026-10-08 02:48（America/Denver）。
 
 服务器部署已完成。`aichemy.club` 尚未正式开放：域名已正确解析，但用户确认尚未完成 ICP 备案，阿里云实际返回 `403 / Non-compliance ICP Filing`。HTTPS 尚未签发，443 尚未监听。
 
@@ -11,25 +11,26 @@
 | 服务器 | `39.106.77.105` |
 | IP 临时预览 | `http://39.106.77.105/` |
 | 正式目标 | `https://aichemy.club/` |
-| 版本 | `20260929T121843Z` |
-| 发布目录 | `/var/www/aichemy/releases/20260929T121843Z` |
+| 版本 | `20261008T084617Z` |
+| 发布目录 | `/var/www/aichemy/releases/20261008T084617Z` |
 | 当前软链接 | `/var/www/aichemy/current` |
 | 部署前备份 | `/var/backups/aichemy/pre-deploy-20260926T081833Z` |
 | 服务器发布记录 | 上述备份目录内的 `deployment-status.json`、`release-manifest.json` |
-| 本地发布包 | `/tmp/aichemy-20260929T121843Z.tar.gz` |
-| 本地验收截图与补丁 | `/tmp/aichemy-deploy-20260929T121843Z/` |
+| 本地发布包 | `/tmp/aichemy-20261008T084617Z.tar.gz` |
+| 本地验收截图与补丁 | `/tmp/aichemy-deploy-20261008T084617Z/` |
 
-发布包 SHA-256：`2a6a3d768ce75ab228cfeaf09726a9af1e14654173f9e6340f9e197ff1266e4d`。
+发布包 SHA-256：`a2ca6cbf5b6794d661808884b3f15d3af4e8ea7a00d844670b1405a99925416b`。
 
-只发布官网 HTML、CSS、JS、favicon、字体及授权文件、微信二维码原图，共 10 个文件。发布副本的 8 个资源引用改为 `/club-assets/`，CSS 与脚本版本号使用本次版本。源码仍使用本地相对地址；未上传开发服务器、海报、文档或凭据。
+只发布官网 HTML、CSS、JS、favicon、字体及授权文件、微信二维码原图，共 11 个文件。发布副本的 9 个资源引用改为 `/club-assets/`，CSS 与脚本版本号使用本次版本。源码仍使用本地相对地址；未上传开发服务器、海报、文档或凭据。
 
 ## 已完成与验证
 
 - 2026-09-27 内容更新已发布：社区模块的友社简介改为“装机 · 回收 · CS 赛事 · 社区”，友链顺序调整为 `groovin.cn`、`mizusumi.com`，并移除重复的“访问友社网站/访问友链网站”文案。三条简介根据对应网站当前公开页面整理。
 - 2026-09-29 内容更新已发布：服务列表新增 `./hatchery`，名称为“炼丹社 Hatchery AI 建站”，链接至 Hatchery 服务入口。
 - 2026-09-29 内容更新已发布：Hatchery 服务条目的状态按钮改为“敬请期待”。
+- 2026-10-08 内容更新已发布：新增 PIXEL / 3D 首屏切换，3D 点阵星核脚本随官网资源部署。
 - 当前 Nginx 配置和 `/etc/nginx/hatchery-https.template` 同步加入官网首页及 `/club-assets/`；原 Hatchery 根资源、API、预览、子域名代理保留。修改前实际配置哈希与交接快照一致。
-- 10 个远程发布文件逐一通过 SHA-256 校验。官网 HTML/JS/CSS、字体、二维码和 favicon 内容及类型正确。
+- 11 个远程发布文件逐一通过 SHA-256 校验。官网 HTML/JS/CSS、字体、二维码和 favicon 内容及类型正确。
 - `/` 为官网；`/club-assets/styles.css` 为官网样式；`/styles.css` 仍是 Hatchery 样式。缺失官网资源返回 404，`/.env` 返回 403。
 - Gallery 的“回到控制台”链接从 `/` 改为 `/hatchery`，本地和服务器 `server.py` 同步；改动前有备份，Python 语法检查通过，Hatchery 重启后健康检查通过。原有 `frontend/index.html` 与 `frontend/script.js` 未覆盖。
 - `/hatchery`、聊天深链接、`/gallery` 均正常；旧 `/?returnTo=...` 保留 302 兼容；未登录 `/api/auth/me` 保留 401 JSON。

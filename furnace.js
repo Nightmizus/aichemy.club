@@ -32,7 +32,8 @@
     H = 0,
     mobile = false;
   let visible = !document.hidden,
-    inView = true;
+    inView = true,
+    suspended = false;
   let paused = reducedMotion.matches,
     clock = 6200,
     lastTime = 0,
@@ -2235,10 +2236,11 @@
       render();
       lastPaint = timestamp;
     }
-    if (visible && inView && !paused) raf = requestAnimationFrame(frame);
+    if (visible && inView && !paused && !suspended)
+      raf = requestAnimationFrame(frame);
   }
   function schedule() {
-    if (!raf && visible && inView && !paused) {
+    if (!raf && visible && inView && !paused && !suspended) {
       lastTime = 0;
       lastPaint = -Infinity;
       raf = requestAnimationFrame(frame);
@@ -2288,7 +2290,7 @@
     sceneOriginX = Math.floor(scene.width / 2);
     sceneOriginY = Math.round(layout.cy / layout.scale) + 40;
     drawBackdrop();
-    render();
+    if (!suspended) render();
     schedule();
   }
   function setPaused(value, announce = true) {
@@ -2322,6 +2324,19 @@
     },
     get state() {
       return { time: clock / 1000, progress: (clock / 28000) % 1 };
+    },
+    // Another hero renderer can take over without changing the user's pause state.
+    // On return, the shared clock keeps the instruments continuous.
+    setSuspended(value, time) {
+      suspended = value;
+      if (typeof time === "number") clock = time * 1000;
+      if (suspended) {
+        if (raf) cancelAnimationFrame(raf);
+        raf = 0;
+      } else {
+        render();
+        schedule();
+      }
     },
   };
   new ResizeObserver(resize).observe(canvas);

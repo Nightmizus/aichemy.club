@@ -29,6 +29,7 @@ const sceneFiles = [
   "index.html",
   "styles.css",
   "furnace.js",
+  "stardust.js",
   "app.js",
   "favicon.svg",
 ];
@@ -47,7 +48,7 @@ function previewHtml(source, revision) {
   const html = source
     .toString("utf8")
     .replace(
-      /((?:src|href)="\.\/(?:furnace\.js|app\.js|styles\.css))(?:\?[^"\s]*)?"/g,
+      /((?:src|href)="\.\/(?:furnace\.js|stardust\.js|app\.js|styles\.css))(?:\?[^"\s]*)?"/g,
       `$1?v=${revision}"`,
     );
   // Local-preview-only reload: the deployable HTML remains independent of this server.
