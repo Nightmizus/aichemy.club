@@ -177,7 +177,7 @@ body {
   outline-offset: 4px;
 }
 
-/* Hero style switch: the original pixel furnace or the 3D dot-matrix core. */
+/* Hero style switch: the original pixel furnace or the 3D dot-matrix furnace. */
 .mode-switch {
   position: absolute;
   z-index: 5;
@@ -200,6 +200,9 @@ body {
 .has-site-nav .mode-switch {
   visibility: hidden;
 }
+.mode-switch[hidden] {
+  display: none;
+}
 .mode-option {
   --mode-accent: #ed864e;
   display: flex;
@@ -218,7 +221,7 @@ body {
     background 0.2s,
     color 0.2s;
 }
-.mode-stardust {
+.mode-3d {
   --mode-accent: #9de1e8;
 }
 .mode-option svg {
@@ -240,24 +243,114 @@ body {
   outline: 2px solid var(--mode-accent);
   outline-offset: 2px;
 }
-/* In 3D mode the backdrop canvas becomes the hero itself and stays behind the page.
+/* In 3D mode a fixed WebGL canvas replaces the pixel scene behind the page.
    The pixel canvas keeps its layout so the title still finds its home position. */
-.stardust-mode #furnace {
+#hero-3d,
+.hero-3d-tags {
+  display: none;
+}
+.furnace-3d #hero-3d {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.furnace-3d #furnace,
+.furnace-3d #lab-backdrop {
   visibility: hidden;
 }
-.stardust-mode #lab-backdrop {
-  opacity: 1;
-  image-rendering: auto;
-}
-.stardust-mode .scene {
+.furnace-3d .scene {
   background: transparent;
 }
-.stardust-mode .club-content {
-  background:
-    linear-gradient(#a3ba8904 1px, transparent 1px) 0 0 / 48px 48px,
-    linear-gradient(90deg, #a3ba8904 1px, transparent 1px) 0 0 / 48px 48px,
-    radial-gradient(ellipse at 0 20%, #2a3c292b, transparent 70%),
-    #0d1712d1;
+/* Callouts pinned to the 3D furnace by furnace3d.js: 料, 火 and 丹. */
+.furnace-3d .hero-3d-tags {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  overflow: hidden;
+  pointer-events: none;
+}
+.hero-tag {
+  --tag-accent: #9de1e8;
+  --tag-rgb: 114 218 229;
+  position: absolute;
+  top: 0;
+  left: 0;
+  will-change: transform;
+}
+.tag-fire {
+  --tag-accent: #ffb25a;
+  --tag-rgb: 255 160 80;
+}
+.tag-pill {
+  --tag-accent: #ffce85;
+  --tag-rgb: 249 192 104;
+}
+.hero-tag::before {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  width: 6px;
+  height: 6px;
+  background: var(--tag-accent);
+  box-shadow: 0 0 10px rgb(var(--tag-rgb) / 0.9);
+}
+/* The leader runs from the anchor dot to the label's nearest corner. */
+.hero-tag::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 46px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--tag-accent), rgb(var(--tag-rgb) / 0.35));
+  transform: rotate(-36deg);
+  transform-origin: 0 0;
+}
+.hero-tag.is-left::after {
+  transform: rotate(-144deg);
+}
+.hero-tag > span {
+  position: absolute;
+  bottom: 27px;
+  left: 37px;
+  display: grid;
+  gap: 5px;
+  padding: 7px 11px 8px;
+  border: 1px solid rgb(var(--tag-rgb) / 0.45);
+  border-left: 2px solid var(--tag-accent);
+  background: #07120dcc;
+  color: #e6eed7;
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: 2px;
+  white-space: nowrap;
+}
+.hero-tag.is-left > span {
+  right: 37px;
+  left: auto;
+  border-right: 2px solid var(--tag-accent);
+  border-left: 1px solid rgb(var(--tag-rgb) / 0.45);
+  text-align: right;
+}
+.hero-tag b {
+  color: var(--tag-accent);
+  font:
+    9px/1 "Courier New",
+    monospace;
+  letter-spacing: 2px;
+}
+@media (max-width: 700px) {
+  .hero-tag > span {
+    padding: 5px 8px 6px;
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
 }
 .sr-only {
   position: absolute;

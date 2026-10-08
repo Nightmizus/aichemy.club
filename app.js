@@ -196,12 +196,6 @@
   const clamp = (value) => Math.max(0, Math.min(1, value));
 
   function captureFloor() {
-    // In 3D mode stardust.js draws the whole hero into this canvas instead.
-    // Switching back raises floorNeedsCapture again through "aichemy-scene".
-    if (window.AIchemyScene.mode === "stardust") {
-      floorNeedsCapture = false;
-      return;
-    }
     if (!furnace.width || !furnace.height) return;
     room.width = furnace.width;
     room.height = furnace.height;

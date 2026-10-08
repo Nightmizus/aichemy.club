@@ -23,17 +23,29 @@
         const scene =
           new URLSearchParams(location.search).get("scene") ||
           localStorage.getItem("aichemy-scene");
-        if (scene === "stardust")
-          document.documentElement.classList.add("stardust-mode");
+        if (scene === "3d")
+          document.documentElement.classList.add("furnace-3d");
       } catch {}
     </script>
     <link rel="stylesheet" href="./styles.css?v=blast-5" />
     <script src="./furnace.js?v=blast-5" defer></script>
-    <script src="./stardust.js?v=blast-5" defer></script>
+    <script src="./furnace3d.js?v=blast-5" defer></script>
     <script src="./app.js?v=blast-5" defer></script>
   </head>
   <body>
     <canvas id="lab-backdrop" aria-hidden="true"></canvas>
+    <canvas id="hero-3d" aria-hidden="true"></canvas>
+    <div class="hero-3d-tags" aria-hidden="true">
+      <span class="hero-tag tag-data" data-anchor="data"
+        ><span><b>DATA</b>以数据为料</span></span
+      >
+      <span class="hero-tag tag-fire is-left" data-anchor="fire"
+        ><span><b>GPU</b>以算力为火</span></span
+      >
+      <span class="hero-tag tag-pill" data-anchor="pill"
+        ><span><b>MODEL</b>以模型为丹</span></span
+      >
+    </div>
     <main>
       <section class="scene" id="top" aria-label="炼丹社 AIchemy 像素实验室">
         <header class="site-nav" aria-hidden="true" inert>
@@ -146,18 +158,18 @@
             PIXEL <span class="sr-only">像素丹炉</span>
           </button>
           <button
-            class="mode-option mode-stardust"
+            class="mode-option mode-3d"
             type="button"
-            data-scene="stardust"
+            data-scene="3d"
             aria-pressed="false"
-            title="3D 点阵星核"
+            title="3D 点阵八卦炉"
           >
             <svg viewBox="0 0 16 16" aria-hidden="true">
               <path
                 d="M7 1h2v2H7zM11 2h2v2h-2zM13 7h2v2h-2zM11 12h2v2h-2zM7 13h2v2H7zM3 12h2v2H3zM1 7h2v2H1zM3 2h2v2H3zM7 7h2v2H7z"
               />
             </svg>
-            3D <span class="sr-only">点阵星核</span>
+            3D <span class="sr-only">点阵八卦炉</span>
           </button>
         </div>
         <div

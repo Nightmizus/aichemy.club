@@ -59,7 +59,7 @@ cd /mizusdev/AIchemy
 npm run check
 ```
 
-只打包 `index.html`、`styles.css`、`app.js`、`furnace.js`、`stardust.js`、`favicon.svg` 和 `assets/`。当前这些文件合计约 367 KiB。字体授权文件随 `assets/` 保留；不上传 `poster/`、开发服务器、文档、`.git`、`.env` 或备份。新增资产后先检查 `assets/` 中仍全部是允许公开的文件。
+只打包 `index.html`、`styles.css`、`app.js`、`furnace.js`、`furnace3d.js`、`favicon.svg` 和 `assets/`。当前这些文件合计约 367 KiB。字体授权文件随 `assets/` 保留；不上传 `poster/`、开发服务器、文档、`.git`、`.env` 或备份。新增资产后先检查 `assets/` 中仍全部是允许公开的文件。
 
 ```bash
 set -euo pipefail
@@ -76,7 +76,7 @@ from pathlib import Path
 
 source = Path.cwd()
 staging = Path(os.environ['AICHEMY_STAGING'])
-for name in ('index.html', 'styles.css', 'app.js', 'furnace.js', 'stardust.js', 'favicon.svg'):
+for name in ('index.html', 'styles.css', 'app.js', 'furnace.js', 'furnace3d.js', 'favicon.svg'):
     shutil.copy2(source / name, staging / name)
 shutil.copytree(source / 'assets', staging / 'assets')
 index = staging / 'index.html'
