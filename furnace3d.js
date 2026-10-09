@@ -842,10 +842,12 @@ void main() {
       canvas.height = H;
     }
     portrait = height > width * 1.05;
-    // The previous size is a floor: enlarge the stage rather than fitting the furnace down.
+    // The phone-only CSS scale gives the furnace breathing room; desktop projection stays intact.
+    const furnaceScale =
+      parseFloat(getComputedStyle(root).getPropertyValue("--furnace-scale")) || 1;
     unit =
       Math.min(H * 0.172, W * (portrait ? 0.4 : 0.3)) *
-      (portrait ? 1.02 : 1.12);
+      (portrait ? 1.02 : 1.12) * furnaceScale;
     const next = width * height < 600000 ? 0.6 : 1;
     if (next !== quality) {
       quality = next;

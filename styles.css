@@ -1752,6 +1752,16 @@ a {
     letter-spacing: 0;
   }
 }
+/* Phone layouts share one furnace scale across both renderers, including touch landscape. */
+@media (max-width: 700px),
+  (max-width: 1000px) and (max-height: 550px) and (pointer: coarse) {
+  :root {
+    --furnace-scale: 0.88;
+  }
+  .console-dock {
+    display: none;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

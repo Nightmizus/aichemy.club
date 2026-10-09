@@ -42,6 +42,7 @@
     charge = 0.5,
     progress = 0.2;
   let layout = null;
+  let furnaceScale = 1;
   let coreLift = 24;
   let sceneOriginX = 360,
     sceneOriginY = 210;
@@ -2198,11 +2199,18 @@
     wallInstruments(t);
     pedestal(t);
     if (blastMode) {
+      // Resize only the furnace, keeping its feet on the existing laboratory platform.
+      if (furnaceScale !== 1) {
+        s.save();
+        s.translate(0, 121 * (1 - furnaceScale));
+        s.scale(furnaceScale, furnaceScale);
+      }
       blastFurnace(t);
       s.save();
       s.translate(0, -45);
       vapor(t);
       s.restore();
+      if (furnaceScale !== 1) s.restore();
     } else {
       handles(t);
       feet();
@@ -2255,6 +2263,8 @@
     canvas.height = H;
     backdrop.width = W;
     backdrop.height = H;
+    furnaceScale =
+      parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--furnace-scale")) || 1;
     layout = compose();
     // Keep the original scene scale. Phone composition moves upward as a whole.
     // Scroll navigation reads this home position without changing canvas layout.
