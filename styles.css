@@ -540,8 +540,8 @@ a {
   transform: translate(var(--title-en-x, 0px), var(--title-en-y, calc(1em + 13px)));
 }
 .furnace-3d .hud-training {
-  left: 26%;
-  top: 8%;
+  left: 42%;
+  top: 45%;
 }
 .furnace-3d .hud-loss {
   right: 5%;
@@ -1640,7 +1640,7 @@ a {
 @media (min-width: 701px) and (max-width: 1100px) and (min-height: 551px) {
   .furnace-3d .hud-training {
     left: 12%;
-    top: 6%;
+    top: 50%;
   }
   .furnace-3d .hud-compute {
     left: 36%;
@@ -1714,8 +1714,8 @@ a {
     font-size: 40px;
   }
   .furnace-3d .hud-training {
-    left: 22%;
-    top: 5%;
+    left: 32%;
+    top: 31%;
   }
   .furnace-3d .hud-loss {
     left: auto;
