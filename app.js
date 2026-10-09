@@ -181,6 +181,8 @@
   // The same title travels from the laboratory into the navigation bar.
   const title = document.querySelector(".hero-title-space");
   const titleText = title.querySelector("h1");
+  const titleChinese = title.querySelector(".title-cn");
+  const titleEnglish = title.querySelector(".title-en");
   const siteNav = document.querySelector(".site-nav");
   const brandSlot = document.querySelector(".site-brand-slot");
   const siteLinks = [...document.querySelectorAll(".site-links a")];
@@ -224,9 +226,16 @@
     const y = Math.max(0, window.scrollY);
     const width = window.innerWidth;
     const height = window.innerHeight;
-    const homeTop =
-      parseFloat(title.style.getPropertyValue("--title-home-top")) ||
-      height * 0.27;
+    const is3d = document.documentElement.classList.contains("furnace-3d");
+    const narrow = width <= 700;
+    const homeLeft = Math.max(
+      narrow ? 22 : 32,
+      width * (narrow ? 0.055 : 0.08),
+    );
+    const homeTop = is3d
+      ? Math.max(86, height * (narrow ? 0.14 : 0.3))
+      : parseFloat(title.style.getPropertyValue("--title-home-top")) ||
+        height * 0.27;
     // Follow the page at full size until the title reaches the viewport's top.
     // Only the remaining scroll distance drives the move into the left slot.
     const dockDistance = Math.min(220, Math.max(120, height * 0.24));
@@ -246,14 +255,39 @@
     const fontSize = parseFloat(getComputedStyle(titleText).fontSize);
     const targetFontSize = width <= 360 ? 18 : width <= 700 ? 20 : 32;
     const targetScale = targetFontSize / fontSize;
+    if (is3d) {
+      // The English line joins the Chinese line as the same title docks.
+      const gap = parseFloat(getComputedStyle(titleText).gap) || 0;
+      const chineseWidth = titleChinese.offsetWidth;
+      const englishWidth = titleEnglish.offsetWidth;
+      const homeWidth = Math.max(chineseWidth, englishWidth);
+      // Clear the Chinese line horizontally before lifting, so the words never cross.
+      const shift = clamp(eased * 2);
+      const lift = clamp((eased - 0.5) * 2);
+      const lineX = (chineseWidth + gap) * shift * shift * (3 - 2 * shift);
+      const lineY = (fontSize + gap) * (1 - lift * lift * (3 - 2 * lift));
+      title.style.setProperty(
+        "--title-heading-width",
+        `${Math.max(homeWidth, lineX + englishWidth)}px`,
+      );
+      title.style.setProperty(
+        "--title-heading-height",
+        `${fontSize + lineY}px`,
+      );
+      title.style.setProperty("--title-en-x", `${lineX}px`);
+      title.style.setProperty("--title-en-y", `${lineY}px`);
+    }
     const targetTop =
-      (siteNav.offsetHeight - titleText.offsetHeight * targetScale) / 2;
-    const targetX = slot.left + slot.width / 2;
+      (siteNav.offsetHeight -
+        (is3d ? fontSize : titleText.offsetHeight) * targetScale) /
+      2;
+    const targetX = is3d ? slot.left : slot.left + slot.width / 2;
+    const homeX = is3d ? homeLeft : width / 2;
     const pageTop = Math.max(0, homeTop - y);
 
     title.style.setProperty(
       "--title-x",
-      `${width / 2 + (targetX - width / 2) * eased}px`,
+      `${homeX + (targetX - homeX) * eased}px`,
     );
     title.style.setProperty(
       "--title-y",

@@ -477,6 +477,47 @@ a {
     0 2px 3px #08150d,
     0 0 9px #08150d;
 }
+/* The 3D hero uses the left side for a two-line title and the right for the furnace. */
+.furnace-3d .hero-title-space {
+  top: var(--title-y, 30svh);
+  left: var(--title-x, 8vw);
+  transform: scale(var(--title-scale, 1));
+  transform-origin: left top;
+  text-align: left;
+}
+.furnace-3d .hero-title-space h1 {
+  position: relative;
+  display: block;
+  width: var(--title-heading-width, 3.5em);
+  height: var(--title-heading-height, calc(2em + 13px));
+}
+.furnace-3d .title-cn,
+.furnace-3d .title-en {
+  display: block;
+  width: max-content;
+}
+.furnace-3d .title-en {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translate(var(--title-en-x, 0px), var(--title-en-y, calc(1em + 13px)));
+}
+.furnace-3d .hud-training {
+  left: 8%;
+  top: 14%;
+}
+.furnace-3d .hud-loss {
+  right: 5%;
+  top: 27%;
+}
+.furnace-3d .hud-compute {
+  left: 8%;
+  bottom: 23%;
+}
+.furnace-3d .hud-data {
+  right: 5%;
+  bottom: 22%;
+}
 /* The full-viewport canvas is unchanged. All interface elements are separate overlays. */
 .console-dock,
 .holograms {
@@ -1545,6 +1586,66 @@ a {
   .nav-lights {
     font-size: 9px;
     gap: 3px;
+  }
+}
+@media (min-width: 701px) and (max-width: 1100px) and (min-height: 551px) {
+  .furnace-3d .hero-title-space h1 {
+    font-size: 56px;
+  }
+  .furnace-3d .hero-title-space p {
+    max-width: 230px;
+    font-size: 16px;
+  }
+}
+@media (max-width: 700px) {
+  .furnace-3d .hero-title-space h1 {
+    font-size: 40px;
+  }
+  .furnace-3d .hero-title-space p {
+    max-width: 160px;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  .tag-pill::after {
+    width: 26px;
+  }
+  .tag-pill > span {
+    left: 21px;
+    bottom: 15px;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+  }
+  .furnace-3d .hud-training {
+    left: 4%;
+    top: 35%;
+  }
+  .furnace-3d .hud-loss {
+    right: 4%;
+    top: 46%;
+  }
+  .furnace-3d .hud-compute {
+    left: 4%;
+    bottom: 26%;
+  }
+  .furnace-3d .hud-data {
+    right: 4%;
+    bottom: 24%;
+  }
+}
+@media (max-height: 550px) and (orientation: landscape) {
+  .furnace-3d .hud-training {
+    left: 33%;
+    top: 12%;
+  }
+  .furnace-3d .hud-loss {
+    top: 25%;
+  }
+  .furnace-3d .hud-compute,
+  .furnace-3d .hud-data {
+    bottom: 112px;
+  }
+  .furnace-3d .hud-compute {
+    left: 34%;
   }
 }
 @media (prefers-reduced-motion: reduce) {

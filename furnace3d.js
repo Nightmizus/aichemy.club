@@ -847,7 +847,8 @@ void main() {
       e,
       yaw: Math.sin(time * 0.16) * 0.45 + pointer.x,
       pitch: 0.32 - e * 0.2 + pointer.y,
-      cx: W / 2,
+      // Offset the original scene as a whole; return to center behind the content.
+      cx: W * (0.5 + (portrait ? 0.06 : 0.14) * (1 - e)),
       cy: H * (0.62 - e * 0.15),
       focus: [0, -0.03 * (1 - e), 0],
     };
