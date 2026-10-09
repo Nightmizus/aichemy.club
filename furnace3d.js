@@ -10,16 +10,12 @@
   const canvas = document.getElementById("hero-3d");
   const tagLayer = document.querySelector(".hero-3d-tags");
   const tags = [...tagLayer.querySelectorAll(".hero-tag")];
-  const title = document.querySelector(".hero-title-space");
-  const scene = document.querySelector(".scene");
-  const navigation = document.querySelector(".scene-nav");
   const furnace = window.AIchemyFurnace;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const MODES = ["pixel", "3d"];
   const TAU = Math.PI * 2;
   const DISTANCE = 7;
   const FLOOR = -1.35;
-  const PILL_HEIGHT = 1.95;
   const FRONT = Math.PI / 2;
   const STRIDE = 13; // position 3, aux 3, network target 3, meta 4
   // Trigram lines from bottom to top, in the 先天 order around the circle.
@@ -35,9 +31,9 @@
   ];
   // Callout anchors in furnace space: the data streams, the fire and the pill.
   const ANCHORS = {
-    data: [1.55, 0.55, 0.3],
-    fire: [-0.55, -1.08, 0.3],
-    pill: [0.3, PILL_HEIGHT, 0],
+    data: [1.95, 0.55, 0.5],
+    fire: [-0.5, -1.12, 0.45],
+    pill: [0.36, 2.5, 0],
   };
   let mode = root.classList.contains("furnace-3d") ? "3d" : "pixel";
 
@@ -320,45 +316,45 @@
     }
 
     // Fire under the belly, and a second fire inside the chamber.
-    for (let i = 0; i < count(660); i++) {
+    for (let i = 0; i < count(1500); i++) {
       const r = 0.55 * Math.sqrt(random());
       const a = random() * TAU;
       const height = 0.1 + 0.3 * random() + 0.45 * random() * (1 - r / 0.55);
-      add(2, Math.cos(a) * r, -1.33, Math.sin(a) * r, 0.3 + random() * 0.25, height);
+      add(2, Math.cos(a) * r, -1.33, Math.sin(a) * r, 0.5 + random() * 0.45, height);
     }
-    for (let i = 0; i < count(560); i++) {
+    for (let i = 0; i < count(1400); i++) {
       const r = 0.6 * Math.sqrt(random());
       const a = random() * TAU;
       const height = 0.45 + 0.55 * random() * (1 - r / 0.6);
       add(2, Math.cos(a) * r, -0.86, Math.sin(a) * r, 0.32 + random() * 0.3, height, 0, 1);
     }
 
-    // Three legible ribbons: evenly spaced dots, with a restrained travelling pulse.
-    for (let stream = 0; stream < 3; stream++) {
-      const radius = 2.8 + stream * 0.25;
-      const angle = (stream / 3) * TAU + 0.4;
-      const height = -0.25 + stream * 0.48;
-      const turns = 0.65 + stream * 0.08;
-      const speed = 1 / (20 + stream * 3);
+    // Seven data streams, each a train of packets spiralling into the furnace.
+    for (let stream = 0; stream < 7; stream++) {
+      const radius = 3 + random() * 1.6;
+      const angle = (stream / 7) * TAU + random() * 0.4;
+      const height = -0.9 + random() * 2.6;
+      const turns = 0.75 + random() * 0.5;
+      const speed = 1 / (13 + random() * 6);
       const phase = random();
-      const total = count(540);
-      for (let i = 0; i < total; i++) {
-        const offset = phase + i / total;
-        add(3, radius, angle, height, turns, speed, offset, stream === 1 ? 1 : 0);
+      for (let i = 0; i < count(560); i++) {
+        const packet = Math.floor(random() * 30) / 30;
+        const offset = phase + packet + (random() - 0.5) * 0.01;
+        add(3, radius, angle, height, turns, speed, offset, stream % 3 === 1 ? 1 : 0);
       }
     }
 
     // The pill: a Fibonacci sphere of dots and two armillary rings.
-    const sphere = count(720);
+    const sphere = count(1000);
     for (let i = 0; i < sphere; i++) {
       const y = 1 - (2 * (i + 0.5)) / sphere;
       const ring = Math.sqrt(1 - y * y);
       const a = i * Math.PI * (3 - Math.sqrt(5));
-      add(4, Math.cos(a) * ring, y, Math.sin(a) * ring, 0.27);
+      add(4, Math.cos(a) * ring, y, Math.sin(a) * ring, 0.3);
     }
     for (const [radius, tilt, speed, accent] of [
-      [0.43, 1.15, 0.18, 1],
-      [0.52, -0.85, -0.13, 2],
+      [0.5, 1.15, 0.45, 1],
+      [0.6, -0.85, -0.32, 2],
     ]) {
       const total = count(240);
       for (let i = 0; i < total; i++)
@@ -366,8 +362,8 @@
     }
 
     // Essence rising from the knob to the pill, and embers thrown off the fire.
-    for (let i = 0; i < count(180); i++) add(5, 0, 0, 0, 0.18 + random() * 0.12);
-    for (let i = 0; i < count(150); i++) {
+    for (let i = 0; i < count(500); i++) add(5, 0, 0, 0, 0.35 + random() * 0.3);
+    for (let i = 0; i < count(380); i++) {
       const a = random() * TAU;
       const r = 0.45 + random() * 0.5;
       const y = -1 + random() * 0.35;
@@ -377,13 +373,13 @@
     const morphing = data.length / STRIDE;
 
     // A dot-matrix floor with a turning bagua array beneath the furnace.
-    const grid = 0.2 / Math.sqrt(quality);
-    const rows = Math.ceil(3.8 / (grid * 0.866));
+    const grid = 0.17 / Math.sqrt(quality);
+    const rows = Math.ceil(5 / (grid * 0.866));
     for (let row = -rows; row <= rows; row++) {
       for (let col = -rows; col <= rows; col++) {
         const x = (col + (row % 2) / 2) * grid;
         const z = row * grid * 0.866;
-        if (Math.hypot(x, z) < 3.8) add(6, x, FLOOR, z);
+        if (Math.hypot(x, z) < 5) add(6, x, FLOOR, z);
       }
     }
     const circle = (radius, accent, speed) => {
@@ -402,27 +398,27 @@
       for (let i = 0; i <= steps; i++)
         add(6, x0 + ((x1 - x0) * i) / steps, FLOOR, z0 + ((z1 - z0) * i) / steps, speed, 0, 0, accent);
     };
-    circle(1.2, 1, 0.025);
-    circle(1.32, 1, 0.025);
-    circle(2.3, 2, -0.025);
+    circle(1.2, 1, 0.05);
+    circle(1.32, 1, 0.05);
+    circle(2.3, 2, -0.07);
     for (let k = 0; k < 8; k++) {
-      segment(1.2, (k * TAU) / 8, 1.2, ((k + 3) * TAU) / 8, 1, 0.025);
-      segment(1.95, ((k + 0.5) * TAU) / 8, 1.95, ((k + 1.5) * TAU) / 8, 1, 0.025);
+      segment(1.2, (k * TAU) / 8, 1.2, ((k + 3) * TAU) / 8, 1, 0.05);
+      segment(1.95, ((k + 0.5) * TAU) / 8, 1.95, ((k + 1.5) * TAU) / 8, 1, 0.05);
     }
     for (let k = 0; k < 72; k++)
-      segment(2.12, (k * TAU) / 72, 2.22, (k * TAU) / 72, 2, -0.025);
+      segment(2.12, (k * TAU) / 72, 2.22, (k * TAU) / 72, 2, -0.07);
     TRIGRAMS.forEach((lines, k) => {
       lines.forEach((solid, j) => {
         const radius = 1.5 + j * 0.1;
         for (let s = -0.13; s <= 0.13; s += fine / radius) {
           if (!solid && Math.abs(s) < 0.035) continue;
           const a = FRONT + (k * TAU) / 8 + s;
-          add(6, Math.cos(a) * radius, FLOOR, Math.sin(a) * radius, -0.025, 0, 0, 2);
+          add(6, Math.cos(a) * radius, FLOOR, Math.sin(a) * radius, -0.07, 0, 0, 2);
         }
       });
     });
 
-    for (let i = 0; i < count(180); i++) {
+    for (let i = 0; i < count(500); i++) {
       const r = 2.5 + random() * 3.5;
       const a = random() * TAU;
       add(7, Math.cos(a) * r, -1.2 + random() * 4.2, Math.sin(a) * r);
@@ -506,17 +502,16 @@ uniform float uMorph;
 uniform float uIntro;
 uniform float uPortrait;
 uniform float uPixel;
-uniform vec2 uStage;
 varying vec3 vColor;
 varying float vAlpha;
 
 const float TAU = 6.2831853;
 const float PI = 3.1415927;
 const float DISTANCE = ${DISTANCE.toFixed(1)};
-const vec3 CYAN = vec3(0.42, 0.76, 0.73);
-const vec3 TEAL = vec3(0.2, 0.4, 0.36);
-const vec3 GOLD = vec3(1.0, 0.72, 0.36);
-const vec3 FLAME = vec3(1.0, 0.44, 0.13);
+const vec3 CYAN = vec3(0.48, 0.86, 0.9);
+const vec3 TEAL = vec3(0.26, 0.52, 0.47);
+const vec3 GOLD = vec3(1.0, 0.78, 0.46);
+const vec3 FLAME = vec3(1.0, 0.6, 0.24);
 const vec3 EMBER = vec3(0.86, 0.22, 0.07);
 const vec3 PURPLE = vec3(0.78, 0.64, 1.0);
 const vec3 WHITE = vec3(1.0, 0.96, 0.88);
@@ -545,123 +540,120 @@ void main() {
   vec3 normal = vec3(0.0, 0.0, 1.0);
   vec3 color = CYAN;
   float alpha = 0.4;
-  float size = 0.017;
+  float size = 0.022;
   float lit = 0.0;
 
   if (kind < 1.5) {
     // Furnace body and lid: a hologram lit from below by the fire.
     normal = aAux;
     if (kind > 0.5) {
-      float spin = -t * 0.065;
-      p = rotY(aPos, spin) + vec3(0.0, sin(t * 0.7) * 0.018, 0.0);
+      float spin = -t * 0.2;
+      p = rotY(aPos, spin) + vec3(0.0, sin(t * 0.8) * 0.025, 0.0);
       normal = rotY(aAux, spin);
     }
     lit = 1.0;
     float warm = 1.0 - smoothstep(-0.95, 0.15, p.y);
-    float flicker = 0.9 + 0.1 * sin(t * 2.0 + p.x * 4.0) * sin(t * 3.3 + p.z * 3.0);
-    color = mix(CYAN, GOLD, warm * 0.6 * flicker);
-    alpha = 0.62;
+    float flicker = 0.85 + 0.15 * sin(t * 9.0 + p.x * 6.0) * sin(t * 5.3 + p.z * 5.0);
+    color = mix(CYAN, FLAME, warm * 0.8 * flicker);
+    alpha = 0.36;
     if (accent > 0.5) {
       color = GOLD;
-      alpha = 0.48;
-      size = 0.018;
+      alpha = 0.7;
+      size = 0.025;
     }
     if (accent > 1.5) {
       // The trigrams light one after another around the belly.
-      float phase = (accent - 2.0) * TAU / 8.0 - t * 0.32;
-      float glow = pow(0.5 + 0.5 * cos(phase), 8.0);
-      color = mix(GOLD, WHITE, glow * 0.3);
-      alpha = 0.72 + glow * 0.28;
-      size = 0.021 + glow * 0.003;
-      lit = 1.0;
+      float glow = exp(-mod(t * 1.1 - (accent - 2.0), 8.0) * 1.3);
+      color = mix(GOLD, WHITE, glow * 0.8);
+      alpha = 0.5 + glow;
+      size = 0.026 + glow * 0.012;
+      lit = 0.4;
     }
-    float scan = p.y - mix(-1.8, 1.7, fract(t / 12.0));
-    scan = exp(-scan * scan * 100.0);
-    color = mix(color, CYAN, scan * 0.35);
-    alpha += scan * 0.14;
+    float scan = p.y - mix(-1.45, 1.4, fract(t / 6.5));
+    scan = exp(-scan * scan * 256.0);
+    color = mix(color, WHITE, scan * 0.6);
+    alpha += scan * 0.8;
   } else if (kind < 2.5) {
     // Fire: rises, narrows and cools from white to deep ember.
     float life = fract(t * aAux.x + seed * 13.0);
-    vec2 sway = vec2(sin(t * 1.8 + seed * 40.0 + life * 5.0), cos(t * 1.5 + seed * 31.0 + life * 4.0)) * 0.055 * life;
+    vec2 sway = vec2(sin(t * 3.1 + seed * 40.0 + life * 5.0), cos(t * 2.6 + seed * 31.0 + life * 4.0)) * 0.07 * life;
     float shrink = 1.0 - life * 0.75;
     p = vec3(aPos.x * shrink + sway.x, aPos.y + life * aAux.y, aPos.z * shrink + sway.y);
-    color = life < 0.25 ? mix(GOLD, FLAME, life / 0.25) : mix(FLAME, EMBER, (life - 0.25) / 0.75);
-    alpha = smoothstep(0.0, 0.12, life) * pow(1.0 - life, 1.5) * (accent > 0.5 ? 0.4 : 0.62);
-    size = mix(0.038, 0.012, life);
+    color = life < 0.3 ? mix(WHITE, FLAME, life / 0.3) : mix(FLAME, EMBER, (life - 0.3) / 0.7);
+    alpha = smoothstep(0.0, 0.08, life) * pow(1.0 - life, 1.3) * (accent > 0.5 ? 0.55 : 0.85);
+    size = mix(0.06, 0.018, life);
   } else if (kind < 3.5) {
     // Data: packets spiral inward, faster as they near the furnace, and drop under the lid.
     float u = fract(t * aAux.y + aAux.z);
     float radius = 0.16 + (aPos.x - 0.16) * pow(1.0 - u, 1.5);
     float angle = aPos.y + aAux.x * TAU * pow(u, 1.6);
-    vec2 lane = (vec2(hash(seed * 91.0), hash(seed * 57.0)) - 0.5) * (0.012 + radius * 0.008);
+    vec2 lane = (vec2(hash(seed * 91.0), hash(seed * 57.0)) - 0.5) * (0.03 + radius * 0.025);
     p = vec3(cos(angle) * radius, mix(aPos.z, 0.68, smoothstep(0.0, 0.95, u)) + lane.y, sin(angle) * radius);
     p += vec3(-sin(angle), 0.0, cos(angle)) * lane.x;
-    float packet = pow(0.5 + 0.5 * cos(u * TAU * 3.0 - t * 0.7), 14.0);
-    color = mix(CYAN, GOLD, accent * 0.38);
-    alpha = smoothstep(0.0, 0.18, u) * (1.0 - smoothstep(0.84, 1.0, u)) * (0.28 + packet * 0.35);
-    size = 0.017 + packet * 0.006;
-    p.x *= mix(1.0, 0.8, uPortrait);
+    float bit = step(0.86, hash(seed * 17.0));
+    color = mix(accent > 0.5 ? PURPLE : CYAN, WHITE, bit * 0.55);
+    alpha = smoothstep(0.0, 0.1, u) * (1.0 - smoothstep(0.88, 1.0, u)) * (0.5 + bit * 0.5);
+    size = 0.022 + bit * 0.012;
   } else if (kind < 4.5) {
     // The pill: a breathing golden sphere with two armillary rings.
-    vec3 center = vec3(0.0, ${PILL_HEIGHT} + sin(t * 0.7) * 0.025, 0.0);
+    vec3 center = vec3(0.0, 2.5 + sin(t * 0.9) * 0.05, 0.0);
     if (accent < 0.5) {
-      vec3 dir = rotY(aPos, t * 0.16);
-      float band = 0.5 + 0.5 * sin(dir.y * 8.0 - t * 1.1);
-      p = center + dir * aAux.x * (1.0 + 0.02 * sin(t * 1.1));
+      vec3 dir = rotY(aPos, t * 0.35);
+      float band = 0.5 + 0.5 * sin(dir.y * 16.0 - t * 2.4);
+      p = center + dir * aAux.x * (1.0 + 0.025 * sin(t * 2.2));
       normal = dir;
-      lit = 0.45;
-      color = mix(GOLD, WHITE, band * 0.4);
-      alpha = 0.55 + band * 0.18;
-      size = 0.023;
+      lit = 0.6;
+      color = mix(GOLD, WHITE, band * 0.7);
+      alpha = 0.32 + band * 0.4;
     } else {
       float angle = aPos.x + t * aAux.z;
-      p = center + rotY(rotX(vec3(cos(angle), 0.0, sin(angle)) * aAux.x, aAux.y), t * 0.08);
-      float head = pow(0.5 + 0.5 * cos(aPos.x - t * 0.35), 12.0);
-      color = mix(accent < 1.5 ? GOLD : CYAN, WHITE, head * 0.3);
-      alpha = 0.18 + head * 0.38;
-      size = 0.016 + head * 0.007;
+      p = center + rotY(rotX(vec3(cos(angle), 0.0, sin(angle)) * aAux.x, aAux.y), t * 0.25);
+      float head = pow(fract(aPos.x / TAU - t * 0.18), 6.0);
+      color = mix(accent < 1.5 ? GOLD : CYAN, WHITE, head * 0.5);
+      alpha = 0.2 + head * 0.9;
+      size = 0.02 + head * 0.012;
     }
   } else if (kind < 5.5) {
     float life = fract(t * aAux.x + seed * 9.0);
     if (accent < 0.5) {
       // Essence climbing from the knob to the pill.
       float angle = seed * TAU + life * 9.0;
-      float radius = 0.025 + 0.025 * sin(life * PI);
-      p = vec3(cos(angle) * radius, 1.3 + life * ${PILL_HEIGHT - 1.56}, sin(angle) * radius);
+      float radius = 0.03 + 0.06 * sin(life * PI);
+      p = vec3(cos(angle) * radius, 1.3 + life * 0.92, sin(angle) * radius);
       color = mix(GOLD, WHITE, life);
-      alpha = sin(life * PI) * 0.35;
-      size = 0.016;
+      alpha = sin(life * PI) * 0.75;
+      size = 0.024;
     } else {
       // Embers thrown up by the fire.
       vec3 spread = normalize(vec3(aPos.x, 0.0, aPos.z)) * 0.5;
       vec3 sway = vec3(sin(t * 2.0 + seed * 30.0), 0.0, cos(t * 1.7 + seed * 20.0)) * 0.06;
       p = aPos + (spread + sway + vec3(0.0, aAux.y, 0.0)) * life;
       color = mix(FLAME, EMBER, life);
-      alpha = (1.0 - life) * smoothstep(0.0, 0.1, life) * 0.25;
-      size = 0.014;
+      alpha = (1.0 - life) * smoothstep(0.0, 0.1, life) * (0.5 + 0.5 * sin(t * 12.0 + seed * 60.0));
+      size = 0.02;
     }
   } else if (kind < 6.5) {
     // Floor: a dot matrix swept by a ripple, under a turning bagua array.
     p = rotY(aPos, t * aAux.x);
     float r = length(aPos.xz);
     if (accent < 0.5) {
-      float wave = r - fract(t * 0.08) * 5.5;
+      float wave = r - fract(t * 0.2) * 5.5;
       wave = exp(-wave * wave * 5.8);
       color = mix(TEAL, CYAN, wave);
-      alpha = (0.05 + wave * 0.12) * (1.0 - smoothstep(1.5, 3.8, r));
-      size = 0.016;
+      alpha = (0.14 + wave * 0.45) * (1.0 - smoothstep(2.0, 5.0, r));
+      size = 0.02;
     } else {
-      color = accent < 1.5 ? mix(TEAL, GOLD, 0.45) : CYAN;
-      alpha = 0.14 + 0.035 * sin(t * 0.7 + r * 3.0);
-      size = 0.017;
+      color = accent < 1.5 ? GOLD : CYAN;
+      alpha = 0.42 + 0.2 * sin(t * 1.5 + r * 3.0);
+      size = 0.021;
     }
     alpha *= 1.0 - uMorph;
   } else {
     // Dust drifting through the room.
     p = aPos + vec3(sin(t * 0.13 + seed * 20.0), sin(t * 0.17 + seed * 13.0) * 0.5, cos(t * 0.11 + seed * 17.0)) * 0.25;
     color = mix(TEAL, CYAN, hash(seed * 3.0));
-    alpha = 0.07 * (0.75 + 0.25 * sin(t * 0.6 + seed * 50.0));
-    size = 0.014;
+    alpha = 0.16 * (0.6 + 0.4 * sin(t * 1.4 + seed * 50.0));
+    size = 0.018;
   }
 
   if (kind < 5.5) {
@@ -669,9 +661,9 @@ void main() {
     float m = clamp(uMorph * 1.7 - seed * 0.7, 0.0, 1.0);
     m = m * m * (3.0 - 2.0 * m);
     if (m > 0.0) {
-      vec3 q = rotX(aTarget, t * 0.06);
+      vec3 q = rotX(aTarget, t * 0.12);
       if (uPortrait > 0.5) q = vec3(q.y, q.x, q.z) * 0.82;
-      p = mix(p, q, m) + scatter * 0.8 * sin(m * PI);
+      p = mix(p, q, m) + scatter * 2.6 * sin(m * PI);
       float layer = clamp(aTarget.x / 5.0 + 0.5, 0.0, 1.0);
       vec3 net = layer < 0.5 ? mix(CYAN, PURPLE, layer * 2.0) : mix(PURPLE, GOLD, layer * 2.0 - 1.0);
       float netAlpha = 0.14;
@@ -680,7 +672,7 @@ void main() {
         float d = fract(aMeta.w) - fract(t * 0.32 + hash(floor(aMeta.w) + 0.5));
         float pulse = exp(-d * d * 260.0);
         net = mix(net, WHITE, pulse * 0.7);
-        netAlpha = 0.12 + pulse * 0.38;
+        netAlpha = 0.18 + pulse * 0.9;
         netSize = 0.018 + pulse * 0.014;
       } else if (aMeta.w < -1.5) {
         netAlpha = 0.12;
@@ -693,10 +685,10 @@ void main() {
     }
   }
 
-  // Assemble in place: floor, vessel, flowing data, then the refined model.
-  float delay = kind < 1.5 ? 0.06 : kind < 3.5 ? 0.18 : kind < 5.5 ? 0.3 : 0.0;
-  float intro = smoothstep(delay, delay + 0.65, uIntro);
-  p += (scatter * 0.4 + normal * 0.08) * (1.0 - intro);
+  // Entrance: every dot flies in from a scattered cloud.
+  float intro = clamp(uIntro * 1.8 - seed * 0.8, 0.0, 1.0);
+  intro = intro * intro * (3.0 - 2.0 * intro);
+  p += scatter * 7.0 * (1.0 - intro);
   alpha *= intro;
 
   vec3 v = rotX(rotY(p - uFocus, uYaw), uPitch);
@@ -707,19 +699,12 @@ void main() {
     // Hologram rim light: edges glow, the far side fades.
     vec3 n = rotX(rotY(normal, uYaw), uPitch);
     float rim = 1.0 - abs(n.z);
-    float key = max(0.0, dot(n, normalize(vec3(-0.5, 0.65, 0.8))));
-    float shade = (0.36 + 0.5 * key + 0.65 * rim * rim) * (n.z < 0.0 ? 0.16 : 1.0);
+    float shade = (0.4 + 0.9 * rim * rim) * (n.z < 0.0 ? 0.5 : 1.0);
     alpha *= mix(1.0, shade, lit);
   }
-  alpha *= clamp(1.0 + (persp - 1.0) * 1.4, 0.3, 1.2);
-  // Keep the title and navigation in quiet space, including on narrow screens.
-  float stage = smoothstep(uStage.x - 16.0 * uPixel, uStage.x + 8.0 * uPixel, screen.y);
-  stage *= 1.0 - smoothstep(uStage.y - 20.0 * uPixel, uStage.y + 12.0 * uPixel, screen.y);
-  alpha *= mix(stage, 0.58, smoothstep(0.1, 1.0, uMorph));
-  vec2 edge = screen / uRes;
-  alpha *= smoothstep(0.0, 0.065, edge.x) * (1.0 - smoothstep(0.935, 1.0, edge.x));
+  alpha *= clamp(1.0 + (persp - 1.0) * 2.2, 0.35, 1.5);
   float pixels = size * persp * uUnit;
-  float minimum = 1.15 * uPixel;
+  float minimum = 1.4 * uPixel;
   if (pixels < minimum) {
     alpha *= pixels / minimum;
     pixels = minimum;
@@ -841,10 +826,6 @@ void main() {
   let dpr = 1;
   let unit = 100;
   let portrait = false;
-  let stageTop = 0;
-  let stageBottom = 1;
-  let homeCenter = 0;
-  let tagSizes = [];
   let paused = furnace.paused;
   let visible = !document.hidden;
   let raf = 0;
@@ -864,10 +845,10 @@ void main() {
     const e = morph * morph * (3 - 2 * morph);
     return {
       e,
-      yaw: -0.12 + Math.sin(time * 0.09) * 0.16 + pointer.x,
-      pitch: 0.2 - e * 0.08 + pointer.y,
+      yaw: Math.sin(time * 0.16) * 0.45 + pointer.x,
+      pitch: 0.32 - e * 0.2 + pointer.y,
       cx: W / 2,
-      cy: homeCenter + (H * 0.47 - homeCenter) * e,
+      cy: H * (0.62 - e * 0.15),
       focus: [0, -0.03 * (1 - e), 0],
     };
   }
@@ -895,30 +876,15 @@ void main() {
     if (mode !== "3d" || !gl) return;
     dpr = Math.min(window.devicePixelRatio || 1, 2);
     const width = window.innerWidth;
-    // Use the stable hero height so mobile browser chrome cannot stretch the composition.
-    const height = scene.clientHeight;
+    const height = window.innerHeight;
     W = Math.round(width * dpr);
-    H = Math.round(window.innerHeight * dpr);
+    H = Math.round(height * dpr);
     if (canvas.width !== W || canvas.height !== H) {
       canvas.width = W;
       canvas.height = H;
     }
     portrait = height > width * 1.05;
-    const narrow = width <= 700 && height >= 550;
-    const compact = height < 550 && width >= 640;
-    const titleTop = compact ? 20 : Math.max(76, height * 0.09);
-    title.style.setProperty("--title-3d-home-top", `${titleTop}px`);
-    stageTop = (titleTop + title.offsetHeight + (narrow ? 12 : 22)) * dpr;
-    stageBottom = (navigation.offsetTop - (narrow ? 156 : 24)) * dpr;
-    unit = Math.min(
-      Math.max(80 * dpr, stageBottom - stageTop) / 4.45,
-      W * (portrait ? 0.24 : 0.18),
-    );
-    homeCenter = stageTop + (stageBottom - stageTop) * 0.56;
-    tagSizes = tags.map((tag) => ({
-      width: tag.firstElementChild.offsetWidth,
-      height: tag.firstElementChild.offsetHeight,
-    }));
+    unit = Math.min(H * 0.172, W * (portrait ? 0.4 : 0.3));
     const next = width * height < 600000 ? 0.6 : 1;
     if (next !== quality) {
       quality = next;
@@ -948,18 +914,17 @@ void main() {
     for (let i = 1; i < 4; i++) gl.disableVertexAttribArray(i);
     gl.uniform2f(glow.uniforms.uRes, W, H);
     const flicker =
-      0.9 + Math.sin(time * 2.1) * 0.06 + Math.sin(time * 3.7) * 0.04;
-    const pulse = 0.9 + Math.sin(time * 1.1) * 0.1;
-    const pillY = PILL_HEIGHT + Math.sin(time * 0.7) * 0.025;
+      0.85 + Math.sin(time * 7.3) * 0.08 + Math.sin(time * 13.1) * 0.05;
+    const pulse = 0.8 + Math.sin(time * 1.8) * 0.2;
+    const pillY = 2.5 + Math.sin(time * 0.9) * 0.05;
     const furnaceLight = (1 - view.e) * shown;
     [
-      [0, -1.08, 0, 1.15, 0.45, [1, 0.35, 0.1], 0.22 * flicker * furnaceLight],
-      [0, -0.55, 0, 0.75, 0.9, [1, 0.44, 0.16], 0.08 * flicker * furnaceLight],
-      [0, pillY, 0, 0.85, 1, [1, 0.66, 0.28], 0.2 * pulse * furnaceLight],
-      [0, pillY, 0, 0.32, 1, [1, 0.87, 0.6], 0.24 * pulse * furnaceLight],
-      [0, 0.15, 0, 1.65, 0.9, [0.25, 0.56, 0.48], 0.065 * furnaceLight],
-      [0, FLOOR, 0, 2.3, 0.25, [0.3, 0.65, 0.55], 0.055 * furnaceLight],
-      [0, 0, 0, 3.2, 0.8, [0.45, 0.5, 0.7], 0.08 * view.e],
+      [0, -1.05, 0, 1.7, 0.55, [1, 0.42, 0.14], 0.3 * flicker * furnaceLight],
+      [0, -0.55, 0, 0.95, 1, [1, 0.5, 0.18], 0.2 * flicker * furnaceLight],
+      [0, pillY, 0, 1.5, 1, [1, 0.72, 0.36], 0.26 * pulse * furnaceLight],
+      [0, pillY, 0, 0.45, 1, [1, 0.94, 0.8], 0.6 * pulse * furnaceLight],
+      [0, FLOOR, 0, 2.6, 0.3, [0.3, 0.75, 0.7], 0.1 * furnaceLight],
+      [0, 0, 0, 3.2, 0.8, [0.55, 0.42, 0.9], 0.14 * view.e],
     ].forEach(([x, y, z, radius, squash, color, strength]) => {
       if (strength <= 0) return;
       const [sx, sy, persp] = project(x, y, z, view);
@@ -998,7 +963,6 @@ void main() {
     gl.uniform1f(u.uIntro, intro);
     gl.uniform1f(u.uPortrait, portrait ? 1 : 0);
     gl.uniform1f(u.uPixel, dpr);
-    gl.uniform2f(u.uStage, stageTop, stageBottom);
     gl.drawArrays(gl.POINTS, 0, pointCount);
 
     placeTags(view, time, shown);
@@ -1015,30 +979,12 @@ void main() {
     const opacity = Math.max(0, shown * 2 - 1) * Math.max(0, 1 - view.e * 3);
     tagLayer.style.opacity = opacity.toFixed(3);
     if (!opacity) return;
-    tags.forEach((tag, index) => {
+    tags.forEach((tag) => {
       const name = tag.dataset.anchor;
-      const [x, y, z] =
-        portrait && name === "data" ? [0.85, 0.7, 0.1] : ANCHORS[name];
-      const bob = name === "pill" ? Math.sin(time * 0.7) * 0.025 : 0;
+      const [x, y, z] = ANCHORS[name];
+      const bob = name === "pill" ? Math.sin(time * 0.9) * 0.05 : 0;
       const [sx, sy] = project(x, y + bob, z, view);
-      const { width, height } = tagSizes[index];
-      const narrow = window.innerWidth <= 700;
-      const left = tag.classList.contains("is-left");
-      const tx = sx / dpr;
-      const ty = sy / dpr;
-      // Move the label and its leader together; the dot stays on its 3D anchor.
-      const room = left ? tx - width - 12 : W / dpr - tx - width - 12;
-      const reach = Math.min(narrow ? 20 : 30, room);
-      const rise = Math.max(
-        ty - stageBottom / dpr + 4,
-        Math.min(narrow ? 14 : 21, ty - stageTop / dpr - height - 2),
-      );
-      const angle = Math.atan2(-rise, left ? -reach : reach);
-      tag.style.setProperty("--tag-reach", `${reach.toFixed(1)}px`);
-      tag.style.setProperty("--tag-rise", `${rise.toFixed(1)}px`);
-      tag.style.setProperty("--tag-line", `${Math.hypot(reach, rise).toFixed(1)}px`);
-      tag.style.setProperty("--tag-angle", `${angle.toFixed(3)}rad`);
-      tag.style.transform = `translate(${tx.toFixed(1)}px, ${ty.toFixed(1)}px)`;
+      tag.style.transform = `translate(${(sx / dpr).toFixed(1)}px, ${(sy / dpr).toFixed(1)}px)`;
     });
   }
 
@@ -1047,7 +993,7 @@ void main() {
     const delta = last ? Math.min(now - last, 100) : 0;
     last = now;
     clock += delta;
-    intro = Math.min(1, intro + delta / 1800);
+    intro = Math.min(1, intro + delta / 2600);
     const ease = Math.min(1, delta / 220);
     morph += (morphTarget() - morph) * ease;
     pointer.x += (pointer.targetX - pointer.x) * ease * 0.5;
@@ -1116,8 +1062,8 @@ void main() {
     "pointermove",
     (event) => {
       if (event.pointerType !== "mouse" || reducedMotion.matches) return;
-      pointer.targetX = (event.clientX / window.innerWidth - 0.5) * 0.22;
-      pointer.targetY = (event.clientY / window.innerHeight - 0.5) * 0.08;
+      pointer.targetX = (event.clientX / window.innerWidth - 0.5) * 0.5;
+      pointer.targetY = (event.clientY / window.innerHeight - 0.5) * 0.16;
     },
     { passive: true },
   );
@@ -1136,10 +1082,6 @@ void main() {
     { passive: true },
   );
   window.addEventListener("resize", resize);
-  document.fonts.ready.then(() => {
-    resize();
-    window.dispatchEvent(new CustomEvent("aichemy-scene", { detail: { mode } }));
-  });
   document.addEventListener("visibilitychange", () => {
     visible = !document.hidden;
     if (visible) schedule();

@@ -265,24 +265,6 @@ body {
 .furnace-3d .scene {
   background: transparent;
 }
-.furnace-3d .vignette {
-  background: radial-gradient(
-    ellipse at 50% 50%,
-    transparent 28%,
-    #03090775 100%
-  );
-}
-.furnace-3d .scanlines {
-  opacity: 0.025;
-}
-.furnace-3d .hud-window {
-  opacity: 0.78;
-  border-color: #91a67450;
-  background: linear-gradient(180deg, #14221be6, #0c1813d9);
-}
-.furnace-3d .hud-window:hover {
-  opacity: 1;
-}
 /* Callouts pinned to the 3D furnace by furnace3d.js: 料, 火 and 丹. */
 .furnace-3d .hero-3d-tags {
   position: fixed;
@@ -311,12 +293,12 @@ body {
 .hero-tag::before {
   content: "";
   position: absolute;
-  top: -2px;
-  left: -2px;
-  width: 4px;
-  height: 4px;
+  top: -3px;
+  left: -3px;
+  width: 6px;
+  height: 6px;
   background: var(--tag-accent);
-  box-shadow: 0 0 8px rgb(var(--tag-rgb) / 0.3);
+  box-shadow: 0 0 10px rgb(var(--tag-rgb) / 0.9);
 }
 /* The leader runs from the anchor dot to the label's nearest corner. */
 .hero-tag::after {
@@ -324,40 +306,36 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  width: var(--tag-line, 36px);
+  width: 46px;
   height: 1px;
-  background: linear-gradient(
-    90deg,
-    var(--tag-accent),
-    rgb(var(--tag-rgb) / 0.35)
-  );
-  transform: rotate(var(--tag-angle, -36deg));
+  background: linear-gradient(90deg, var(--tag-accent), rgb(var(--tag-rgb) / 0.35));
+  transform: rotate(-36deg);
   transform-origin: 0 0;
 }
 .hero-tag.is-left::after {
-  transform: rotate(var(--tag-angle, -144deg));
+  transform: rotate(-144deg);
 }
 .hero-tag > span {
   position: absolute;
-  bottom: var(--tag-rise, 21px);
-  left: var(--tag-reach, 30px);
+  bottom: 27px;
+  left: 37px;
   display: grid;
   gap: 5px;
-  padding: 6px 9px 7px;
-  border: 1px solid rgb(var(--tag-rgb) / 0.18);
-  border-left: 1px solid rgb(var(--tag-rgb) / 0.6);
-  background: #07120da8;
-  color: #bbc8b4;
-  font-size: 12px;
+  padding: 7px 11px 8px;
+  border: 1px solid rgb(var(--tag-rgb) / 0.45);
+  border-left: 2px solid var(--tag-accent);
+  background: #07120dcc;
+  color: #e6eed7;
+  font-size: 14px;
   line-height: 1;
   letter-spacing: 2px;
   white-space: nowrap;
 }
 .hero-tag.is-left > span {
-  right: var(--tag-reach, 30px);
+  right: 37px;
   left: auto;
-  border-right: 1px solid rgb(var(--tag-rgb) / 0.6);
-  border-left: 1px solid rgb(var(--tag-rgb) / 0.18);
+  border-right: 2px solid var(--tag-accent);
+  border-left: 1px solid rgb(var(--tag-rgb) / 0.45);
   text-align: right;
 }
 .hero-tag b {
@@ -369,18 +347,9 @@ body {
 }
 @media (max-width: 700px) {
   .hero-tag > span {
-    bottom: var(--tag-rise, 14px);
-    left: var(--tag-reach, 20px);
-    padding: 4px 6px 5px;
-    font-size: 10px;
+    padding: 5px 8px 6px;
+    font-size: 12px;
     letter-spacing: 1px;
-  }
-  .hero-tag::after {
-    width: var(--tag-line, 24px);
-  }
-  .hero-tag.is-left > span {
-    right: var(--tag-reach, 20px);
-    left: auto;
   }
 }
 .sr-only {
@@ -1522,9 +1491,6 @@ a {
   }
 }
 @media (max-height: 550px) and (orientation: landscape) {
-  .furnace-3d .hero-3d-tags {
-    display: none;
-  }
   .hero-title-space h1 {
     font-size: 40px;
   }
@@ -1579,38 +1545,6 @@ a {
   .nav-lights {
     font-size: 9px;
     gap: 3px;
-  }
-}
-@media (max-width: 700px) and (max-height: 550px) and (orientation: landscape) {
-  .furnace-3d .hero-title-space h1 {
-    font-size: 28px;
-  }
-}
-/* Narrow 3D composition: reserve a clear stage, then two compact instrument rows. */
-@media (max-width: 700px) and (min-height: 550px) {
-  .furnace-3d .hud-window {
-    top: auto;
-    transform: scale(0.84);
-  }
-  .furnace-3d .hud-training {
-    left: 6%;
-    bottom: 210px;
-    transform-origin: bottom left;
-  }
-  .furnace-3d .hud-loss {
-    right: 6%;
-    bottom: 205px;
-    transform-origin: bottom right;
-  }
-  .furnace-3d .hud-compute {
-    left: 9%;
-    bottom: 140px;
-    transform-origin: bottom left;
-  }
-  .furnace-3d .hud-data {
-    right: 6%;
-    bottom: 139px;
-    transform-origin: bottom right;
   }
 }
 @media (prefers-reduced-motion: reduce) {
