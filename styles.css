@@ -540,16 +540,17 @@ a {
   transform: translate(var(--title-en-x, 0px), var(--title-en-y, calc(1em + 13px)));
 }
 .furnace-3d .hud-training {
-  left: 6%;
-  top: 10%;
+  left: 26%;
+  top: 8%;
 }
 .furnace-3d .hud-loss {
   right: 5%;
   top: 27%;
 }
 .furnace-3d .hud-compute {
-  left: 6%;
-  bottom: 25%;
+  left: 43%;
+  top: 11%;
+  bottom: auto;
 }
 .furnace-3d .hud-data {
   right: 5%;
@@ -1637,6 +1638,14 @@ a {
   }
 }
 @media (min-width: 701px) and (max-width: 1100px) and (min-height: 551px) {
+  .furnace-3d .hud-training {
+    left: 12%;
+    top: 6%;
+  }
+  .furnace-3d .hud-compute {
+    left: 36%;
+    top: 8%;
+  }
   .furnace-3d .hero-title-space h1 {
     font-size: 56px;
   }
@@ -1684,12 +1693,16 @@ a {
     top: max(32%, 232px);
   }
   .furnace-3d .hud-loss {
-    right: 4%;
-    top: max(32%, 232px);
+    right: auto;
+    left: 4%;
+    top: auto;
+    bottom: 146px;
   }
   .furnace-3d .hud-compute {
-    left: 4%;
-    bottom: 146px;
+    left: auto;
+    right: 4%;
+    top: max(32%, 232px);
+    bottom: auto;
   }
   .furnace-3d .hud-data {
     right: 4%;
@@ -1701,18 +1714,23 @@ a {
     font-size: 40px;
   }
   .furnace-3d .hud-training {
-    left: 33%;
-    top: 12%;
+    left: 22%;
+    top: 5%;
   }
   .furnace-3d .hud-loss {
+    left: auto;
+    right: 4%;
     top: 25%;
+    bottom: auto;
   }
-  .furnace-3d .hud-compute,
   .furnace-3d .hud-data {
     bottom: 112px;
   }
   .furnace-3d .hud-compute {
-    left: 34%;
+    left: 46%;
+    right: auto;
+    top: 6%;
+    bottom: auto;
   }
 }
 @media (max-width: 360px) {

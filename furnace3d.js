@@ -1,6 +1,6 @@
-/* 3D dot-matrix 八卦炉, the alternative hero beside the pixel furnace.
+/* 3D dot-matrix industrial blast furnace, beside the pixel laboratory.
    以数据为料，以算力为火，以模型为丹: data spirals in as feedstock, compute
-   burns beneath the belly, and the refined model floats above as a pill.
+   fires the hearth, and the refined model floats above the charging tower.
    Scrolling refines the whole furnace into a neural network.
    Raw WebGL without libraries: geometry is built once, and every particle
    moves in the vertex shader. */
@@ -20,17 +20,6 @@
   const PILL_X = 0.12;
   const FRONT = Math.PI / 2;
   const STRIDE = 13; // position 3, aux 3, network target 3, meta 4
-  // Trigram lines from bottom to top, in the 先天 order around the circle.
-  const TRIGRAMS = [
-    [1, 1, 1], // 乾
-    [1, 1, 0], // 兑
-    [1, 0, 1], // 离
-    [1, 0, 0], // 震
-    [0, 0, 0], // 坤
-    [0, 0, 1], // 艮
-    [0, 1, 0], // 坎
-    [0, 1, 1], // 巽
-  ];
   // Callout anchors in furnace space: the data streams, the fire and the pill.
   const ANCHORS = {
     data: [1.95, 0.55, 0.5],
@@ -48,32 +37,6 @@
     let value = Math.imul(seed ^ (seed >>> 15), 1 | seed);
     value = (value + Math.imul(value ^ (value >>> 7), 61 | value)) ^ value;
     return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
-  }
-
-  // Catmull-Rom through [radius, height] control points.
-  function spline(points, steps) {
-    const curve = [];
-    for (let i = 0; i < points.length - 1; i++) {
-      const p0 = points[Math.max(0, i - 1)];
-      const p1 = points[i];
-      const p2 = points[i + 1];
-      const p3 = points[Math.min(points.length - 1, i + 2)];
-      for (let s = 0; s < steps; s++) {
-        const t = s / steps;
-        curve.push(
-          [0, 1].map(
-            (k) =>
-              0.5 *
-              (2 * p1[k] +
-                (p2[k] - p0[k]) * t +
-                (2 * p0[k] - 5 * p1[k] + 4 * p2[k] - p3[k]) * t * t +
-                (3 * p1[k] - p0[k] - 3 * p2[k] + p3[k]) * t * t * t),
-          ),
-        );
-      }
-    }
-    curve.push(points[points.length - 1].slice());
-    return curve;
   }
 
   // Revolves a profile into rings of evenly spaced dots, offset every other ring.
@@ -109,220 +72,185 @@
   function build(quality) {
     seed = 20260926;
     const data = [];
-    // Kinds: 0 furnace, 1 lid, 2 fire, 3 data, 4 pill, 5 sparks, 6 floor, 7 dust, 8 field.
+    // Kinds: 0 steelwork, 1 skip, 2 fire, 3 data, 4 model, 5 sparks, 6 floor, 7 dust, 8 field, 9 iron.
     const add = (kind, x, y, z, a = 0, b = 0, c = 0, accent = 0) =>
       data.push(x, y, z, a, b, c, 0, 0, 0, kind, random(), accent, -1);
     const gap = 0.034 / Math.sqrt(quality);
     const fine = 0.018 / Math.sqrt(quality);
     const count = (base) => Math.round(base * quality);
 
-    // Belly, shoulder and flared rim of the furnace.
-    const belly = spline(
-      [
-        [0, -0.93],
-        [0.3, -0.9],
-        [0.58, -0.8],
-        [0.8, -0.6],
-        [0.92, -0.34],
-        [0.94, -0.12],
-        [0.88, 0.12],
-        [0.76, 0.32],
-        [0.7, 0.42],
-        [0.73, 0.49],
-        [0.84, 0.53],
-        [0.87, 0.57],
-        [0.8, 0.6],
-        [0.7, 0.58],
-      ],
-      24,
-    );
+    // A blast furnace has a tapered shaft, broad bosh and a straight refractory hearth.
+    // Keep the existing world-space scale; the steelwork expands its silhouette.
+    const shell = [
+      [0, -1.12], [0.72, -1.12], [0.72, -0.64], [0.91, -0.22],
+      [0.91, 0.04], [0.57, 1.03], [0.43, 1.17], [0.43, 1.4],
+    ];
     const radiusAt = (y) => {
-      for (let i = 1; i < belly.length; i++) {
-        const [r0, y0] = belly[i - 1];
-        const [r1, y1] = belly[i];
-        if (y1 >= y) return r0 + ((r1 - r0) * (y - y0)) / (y1 - y0 || 1);
+      for (let i = 2; i < shell.length; i++) {
+        const [r0, y0] = shell[i - 1];
+        const [r1, y1] = shell[i];
+        if (y <= y1) return r0 + (r1 - r0) * (y - y0) / (y1 - y0 || 1);
       }
-      return 0.7;
+      return 0.43;
     };
     const fromFront = (theta) =>
       Math.atan2(Math.sin(theta - FRONT), Math.cos(theta - FRONT));
-    lathe(belly, gap, (r, y, theta, nr, ny) => {
-      // Leave the fire door open so the chamber shows through.
-      if (Math.abs(fromFront(theta)) < 0.32 && y > -0.72 && y < -0.44) return;
+    lathe(shell, gap, (r, y, theta, nr, ny) => {
+      // A front cutaway exposes the incandescent hearth and the tapping opening.
+      if (Math.abs(fromFront(theta)) < 0.48 && y > -1.01 && y < -0.45) return;
       const c = Math.cos(theta);
       const s = Math.sin(theta);
       add(0, c * r, y, s * r, c * nr, ny, s * nr);
     });
-    // Raised gold details sit just proud of the belly surface.
-    const emboss = (theta, y, accent) => {
-      const r = radiusAt(y) + 0.014;
-      const c = Math.cos(theta);
-      const s = Math.sin(theta);
-      add(0, c * r, y, s * r, c, 0, s, accent);
+
+    const edge = (a, b, accent = 0, kind = 0) => {
+      const steps = Math.max(1, Math.ceil(Math.hypot(...a.map((v, i) => b[i] - v)) / fine));
+      for (let i = 0; i <= steps; i++) {
+        const p = a.map((v, k) => v + (b[k] - v) * i / steps);
+        add(kind, ...p, 0, 0, 1, accent);
+      }
     };
-    for (const y of [-0.34, 0.04, 0.4]) {
-      const total = Math.round((TAU * radiusAt(y)) / fine);
-      for (let i = 0; i < total; i++) emboss((i / total) * TAU, y, 1);
-    }
-    for (let s = -0.34; s <= 0.34; s += fine / 0.9) {
-      emboss(FRONT + s, -0.42, 1);
-      emboss(FRONT + s, -0.74, 1);
-    }
-    for (let y = -0.74; y <= -0.42; y += fine) {
-      emboss(FRONT - 0.34, y, 1);
-      emboss(FRONT + 0.34, y, 1);
-    }
-    // Eight trigrams around the widest part, 乾 above the fire door.
-    TRIGRAMS.forEach((lines, k) => {
-      lines.forEach((solid, j) => {
-        const y = -0.25 + j * 0.095;
-        for (let s = -0.17; s <= 0.17; s += fine / radiusAt(y)) {
-          if (!solid && Math.abs(s) < 0.045) continue;
-          emboss(FRONT + (k * TAU) / 8 + s, y - 0.012, 2 + k);
-          emboss(FRONT + (k * TAU) / 8 + s, y + 0.012, 2 + k);
-        }
-      });
-    });
-    for (const [r, y] of [
-      [0.875, 0.575],
-      [0.72, 0.59],
-    ]) {
-      const total = Math.round((TAU * r) / fine);
+    const ring = (r, y, accent = 0, cx = 0, cz = 0) => {
+      const total = Math.ceil(TAU * r / fine);
       for (let i = 0; i < total; i++) {
-        const c = Math.cos((i / total) * TAU);
-        const s = Math.sin((i / total) * TAU);
-        add(0, c * r, y, s * r, c * 0.6, 0.8, s * 0.6, 1);
+        const a = i / total * TAU;
+        const c = Math.cos(a);
+        const s = Math.sin(a);
+        add(0, cx + c * r, y, cz + s * r, c, 0, s, accent);
       }
-    }
-
-    // Three splayed legs with a knee and a paw, one at the back.
-    for (const phi of [Math.PI / 6, (5 * Math.PI) / 6, (3 * Math.PI) / 2]) {
-      const rx = Math.cos(phi);
-      const rz = Math.sin(phi);
-      const rings = Math.round(0.6 / gap);
-      for (let i = 0; i <= rings; i++) {
-        const t = i / rings;
-        const out = 0.5 + 0.12 * t + 0.05 * Math.sin(Math.PI * t);
-        const thick =
-          0.085 -
-          0.03 * t +
-          0.035 * Math.exp(-(((t - 0.95) / 0.06) ** 2)) +
-          0.03 * Math.exp(-(((t - 0.12) / 0.08) ** 2));
-        const total = Math.max(6, Math.round((TAU * thick) / (gap * 0.8)));
-        for (let j = 0; j < total; j++) {
-          const a = ((j + (i % 2) / 2) / total) * TAU;
-          const nx = rx * Math.cos(a) - rz * Math.sin(a);
-          const nz = rz * Math.cos(a) + rx * Math.sin(a);
-          const y = -0.8 - 0.55 * t;
-          add(0, rx * out + nx * thick, y, rz * out + nz * thick, nx, 0, nz);
+    };
+    const box = (center, size, accent = 0, kind = 0) => {
+      for (let axis = 0; axis < 3; axis++) {
+        for (const u of [-1, 1]) for (const v of [-1, 1]) {
+          const a = center.slice();
+          const b = center.slice();
+          a[axis] -= size[axis] / 2;
+          b[axis] += size[axis] / 2;
+          for (const [offset, sign] of [[1, u], [2, v]]) {
+            const side = (axis + offset) % 3;
+            a[side] = b[side] = center[side] + sign * size[side] / 2;
+          }
+          edge(a, b, accent, kind);
         }
       }
-    }
-
-    // Two upright ears on the rim: posts joined by a rounded bar.
-    const loop = [];
-    for (let v = 0; v < 0.28; v += 0.01) loop.push([-0.17, v]);
-    for (let a = Math.PI; a > Math.PI / 2; a -= 0.1)
-      loop.push([-0.11 + Math.cos(a) * 0.06, 0.28 + Math.sin(a) * 0.06]);
-    for (let u = -0.11; u < 0.11; u += 0.01) loop.push([u, 0.34]);
-    for (let a = Math.PI / 2; a > 0; a -= 0.1)
-      loop.push([0.11 + Math.cos(a) * 0.06, 0.28 + Math.sin(a) * 0.06]);
-    for (let v = 0.28; v >= 0; v -= 0.01) loop.push([0.17, v]);
-    for (const phi of [0, Math.PI]) {
-      const rx = Math.cos(phi);
-      const rz = Math.sin(phi);
-      let travelled = 0;
-      for (let i = 1; i < loop.length; i++) {
-        const [u0, v0] = loop[i - 1];
-        const [u1, v1] = loop[i];
-        const step = Math.hypot(u1 - u0, v1 - v0);
-        travelled += step;
-        if (travelled < gap * 0.7) continue;
-        travelled = 0;
-        // Cross-section ring: radial axis plus the in-plane normal of the path.
-        const mu = (v1 - v0) / step;
-        const mv = (u0 - u1) / step;
-        const out = 0.8 + v1 * 0.2;
-        for (let j = 0; j < 7; j++) {
-          const a = (j / 7) * TAU;
-          const nx = rx * Math.cos(a) - rz * mu * Math.sin(a);
-          const ny = mv * Math.sin(a);
-          const nz = rz * Math.cos(a) + rx * mu * Math.sin(a);
-          add(
-            0,
-            rx * out - rz * u1 + nx * 0.028,
-            0.57 + v1 + ny * 0.028,
-            rz * out + rx * u1 + nz * 0.028,
-            nx,
-            ny,
-            nz,
-          );
+    };
+    // Point-sampled pipes, with a local orthonormal cross section at each segment.
+    const pipe = (path, radius, accent = 0) => {
+      for (let k = 1; k < path.length; k++) {
+        const a = path[k - 1];
+        const b = path[k];
+        const delta = b.map((v, i) => v - a[i]);
+        const length = Math.hypot(...delta);
+        const d = delta.map((v) => v / length);
+        const side = Math.abs(d[1]) > 0.9 ? [1, 0, 0] : [-d[2], 0, d[0]];
+        const norm = Math.hypot(...side);
+        const u = side.map((v) => v / norm);
+        const v = [d[1] * u[2] - d[2] * u[1], d[2] * u[0] - d[0] * u[2], d[0] * u[1] - d[1] * u[0]];
+        const steps = Math.ceil(length / gap);
+        const sides = Math.max(8, Math.ceil(TAU * radius / gap));
+        for (let j = 0; j <= steps; j++) {
+          for (let i = 0; i < sides; i++) {
+            const theta = (i + (j % 2) * 0.5) / sides * TAU;
+            const n = u.map((value, axis) => value * Math.cos(theta) + v[axis] * Math.sin(theta));
+            const p = a.map((value, axis) => value + delta[axis] * j / steps + n[axis] * radius);
+            add(0, ...p, ...n, accent);
+          }
         }
+      }
+    };
+
+    // Steel cooling bands and longitudinal ribs make the tall shell legible.
+    for (const y of [-1.1, -0.88, -0.64, -0.22, 0.04, 0.36, 0.7, 1.03, 1.19, 1.38]) {
+      ring(radiusAt(y) + 0.012, y, y < -0.6 ? 1 : 0);
+      ring(radiusAt(y) + 0.012, y + 0.025);
+    }
+    for (let k = 0; k < 12; k++) {
+      const a = k / 12 * TAU;
+      for (const [y0, y1] of [[-0.62, -0.23], [0.05, 1.03]]) {
+        edge([Math.cos(a) * (radiusAt(y0) + 0.02), y0, Math.sin(a) * (radiusAt(y0) + 0.02)],
+          [Math.cos(a) * (radiusAt(y1) + 0.02), y1, Math.sin(a) * (radiusAt(y1) + 0.02)]);
+      }
+    }
+    // Rectangular inspection frame around the glowing hearth.
+    box([0, -0.74, 0.72], [0.66, 0.55, 0.06], 1);
+
+    // Two walkways, with grated decks, guardrails and evenly spaced stanchions.
+    for (const [y, inner, outer] of [[0.14, 0.9, 1.12], [1.04, 0.56, 0.81]]) {
+      ring(inner, y);
+      ring(outer, y, 1);
+      ring(outer, y + 0.2);
+      ring(outer, y + 0.11);
+      for (let k = 0; k < 40; k++) {
+        const a = k / 40 * TAU;
+        const c = Math.cos(a);
+        const s = Math.sin(a);
+        edge([c * inner, y, s * inner], [c * outer, y, s * outer]);
+        if (k % 2 === 0) edge([c * outer, y, s * outer], [c * outer, y + 0.2, s * outer]);
       }
     }
 
-    // The lid floats above the rim; data drops through the gap.
-    const lid = spline(
-      [
-        [0.88, 0.8],
-        [0.89, 0.85],
-        [0.8, 0.91],
-        [0.62, 0.99],
-        [0.42, 1.05],
-        [0.22, 1.1],
-        [0.1, 1.12],
-      ],
-      24,
-    );
-    lathe(lid, gap, (r, y, theta, nr, ny) => {
-      const c = Math.cos(theta);
-      const s = Math.sin(theta);
-      add(1, c * r, y, s * r, c * nr, ny, s * nr);
-    });
-    const knob = spline(
-      [
-        [0.02, 1.11],
-        [0.075, 1.14],
-        [0.095, 1.2],
-        [0.075, 1.26],
-        [0.01, 1.29],
-      ],
-      12,
-    );
-    lathe(knob, fine * 1.4, (r, y, theta, nr, ny) => {
-      const c = Math.cos(theta);
-      const s = Math.sin(theta);
-      add(1, c * r, y, s * r, c * nr, ny, s * nr, 1);
-    });
+    // Four steel columns and cross-bracing support the furnace, leaving its front open.
+    for (const x of [-0.94, 0.94]) for (const z of [-0.72, 0.72]) {
+      box([x, -0.54, z], [0.065, 1.6, 0.065]);
+      box([x, FLOOR + 0.035, z], [0.25, 0.07, 0.25], 1);
+    }
+    for (const x of [-0.94, 0.94]) {
+      edge([x, -1.28, -0.72], [x, 0.17, 0.72]);
+      edge([x, -1.28, 0.72], [x, 0.17, -0.72]);
+    }
+
+    // Off-gas uptakes join a large external downcomer; collars read as bolted flanges.
+    for (const x of [-0.31, 0.31]) {
+      pipe([[x, 1.26, -0.22], [x, 1.62, -0.22]], 0.065);
+    }
+    pipe([[-0.31, 1.62, -0.22], [0.92, 1.62, -0.22]], 0.065);
+    pipe([[0.92, 1.62, -0.22], [1.17, 1.42, -0.22], [1.17, -0.69, -0.22], [1.02, -0.8, -0.22]], 0.125);
+    for (const y of [-0.63, -0.1, 0.5, 1.1, 1.4]) {
+      ring(0.145, y, 1, 1.17, -0.22);
+      ring(0.145, y + 0.035, 0, 1.17, -0.22);
+    }
+    // The hot-blast bustle pipe encircles the bosh and feeds eight tuyeres.
+    const bustle = Array.from({ length: 65 }, (_, i) => [Math.cos(i / 64 * TAU) * 1.01, -0.58, Math.sin(i / 64 * TAU) * 1.01]);
+    pipe(bustle, 0.052);
     for (let k = 0; k < 8; k++) {
-      const theta = (k * TAU) / 8 + TAU / 16;
-      const c = Math.cos(theta);
-      const s = Math.sin(theta);
-      let travelled = 0;
-      for (let i = 1; i < lid.length; i++) {
-        travelled += Math.hypot(
-          lid[i][0] - lid[i - 1][0],
-          lid[i][1] - lid[i - 1][1],
-        );
-        if (travelled < fine) continue;
-        travelled = 0;
-        const [r, y] = lid[i];
-        add(1, c * (r + 0.01), y + 0.01, s * (r + 0.01), c, 0.5, s, 1);
-      }
-    }
-    const lidRim = Math.round((TAU * 0.885) / fine);
-    for (let i = 0; i < lidRim; i++) {
-      const c = Math.cos((i / lidRim) * TAU);
-      const s = Math.sin((i / lidRim) * TAU);
-      add(1, c * 0.885, 0.8, s * 0.885, c, 0, s, 1);
+      const a = (k + 0.5) / 8 * TAU;
+      const c = Math.cos(a);
+      const s = Math.sin(a);
+      pipe([[c * 1.01, -0.58, s * 1.01], [c * 0.95, -0.8, s * 0.95], [c * 0.73, -0.86, s * 0.73]], 0.035, 1);
     }
 
-    // Fire under the belly, and a second fire inside the chamber.
+    // Charging hopper and sloping skip hoist on the opposite side of the downcomer.
+    lathe([[0.18, 1.37], [0.18, 1.46], [0.4, 1.58], [0.4, 1.64]], gap, (r, y, a, nr, ny) => {
+      add(0, Math.cos(a) * r, y, Math.sin(a) * r, Math.cos(a) * nr, ny, Math.sin(a) * nr);
+    });
+    ring(0.4, 1.64, 1);
+    for (const z of [-0.36, -0.08]) edge([-1.52, -1.25, z], [-0.37, 1.5, z]);
+    for (let i = 0; i <= 32; i++) {
+      const u = i / 32;
+      const x = -1.52 + 1.15 * u;
+      const y = -1.25 + 2.75 * u;
+      edge([x, y, -0.36], [x, y, -0.08]);
+    }
+    box([0, 0, 0], [0.26, 0.2, 0.27], 1, 1);
+    for (let x = -0.1; x <= 0.1; x += gap) {
+      for (let z = -0.1; z <= 0.1; z += gap) add(1, x, 0.075 + random() * 0.05, z, 0, 1, 0, 1);
+    }
+
+    // A straight casting runner carries molten iron from the open hearth toward the viewer.
+    for (const side of [-1, 1]) {
+      edge([side * 0.1, -1.02, 0.71], [0.86 + side * 0.1, -1.23, 1.5], 1);
+      edge([side * 0.1, -1.08, 0.71], [0.86 + side * 0.1, -1.29, 1.5]);
+    }
+    for (let i = 0; i < count(800); i++) {
+      add(9, random(), (random() - 0.5) * 0.14, random(), 0.2 + random() * 0.16);
+    }
+
+    // White-hot tuyeres and a second, tall fire inside the hearth.
     for (let i = 0; i < count(1500); i++) {
-      const r = 0.55 * Math.sqrt(random());
+      const r = 0.58 * Math.sqrt(random());
       const a = random() * TAU;
-      const height = 0.1 + 0.3 * random() + 0.45 * random() * (1 - r / 0.55);
-      add(2, Math.cos(a) * r, -1.33, Math.sin(a) * r, 0.5 + random() * 0.45, height);
+      const height = 0.1 + 0.3 * random() + 0.45 * random() * (1 - r / 0.58);
+      add(2, Math.cos(a) * r, -1.17, Math.sin(a) * r, 0.5 + random() * 0.45, height);
     }
     for (let i = 0; i < count(1400); i++) {
       const r = 0.6 * Math.sqrt(random());
@@ -363,7 +291,7 @@
         add(4, (i / total) * TAU, 0, 0, radius, tilt, speed, accent);
     }
 
-    // Essence rising from the knob to the pill, and embers thrown off the fire.
+    // Refined model signals rising from the charging tower, with embers from the hearth.
     for (let i = 0; i < count(500); i++) add(5, 0, 0, 0, 0.35 + random() * 0.3);
     for (let i = 0; i < count(380); i++) {
       const a = random() * TAU;
@@ -374,7 +302,7 @@
 
     const morphing = data.length / STRIDE;
 
-    // A dot-matrix floor with a turning bagua array beneath the furnace.
+    // A dot-matrix casting floor with concentric process rings beneath the steelwork.
     const grid = 0.17 / Math.sqrt(quality);
     const rows = Math.ceil(5 / (grid * 0.866));
     for (let row = -rows; row <= rows; row++) {
@@ -403,22 +331,13 @@
     circle(1.2, 1, 0.05);
     circle(1.32, 1, 0.05);
     circle(2.3, 2, -0.07);
-    for (let k = 0; k < 8; k++) {
-      segment(1.2, (k * TAU) / 8, 1.2, ((k + 3) * TAU) / 8, 1, 0.05);
-      segment(1.95, ((k + 0.5) * TAU) / 8, 1.95, ((k + 1.5) * TAU) / 8, 1, 0.05);
-    }
     for (let k = 0; k < 72; k++)
-      segment(2.12, (k * TAU) / 72, 2.22, (k * TAU) / 72, 2, -0.07);
-    TRIGRAMS.forEach((lines, k) => {
-      lines.forEach((solid, j) => {
-        const radius = 1.5 + j * 0.1;
-        for (let s = -0.13; s <= 0.13; s += fine / radius) {
-          if (!solid && Math.abs(s) < 0.035) continue;
-          const a = FRONT + (k * TAU) / 8 + s;
-          add(6, Math.cos(a) * radius, FLOOR, Math.sin(a) * radius, -0.07, 0, 0, 2);
-        }
-      });
-    });
+      segment(k % 6 === 0 ? 1.95 : 2.12, (k * TAU) / 72, 2.22, (k * TAU) / 72, 2, -0.07);
+    for (let k = 0; k < 12; k++) {
+      const a = k / 12 * TAU;
+      segment(1.34, a, 1.7, a, 1, 0.05);
+      segment(1.7, a, 1.7, a + TAU / 36, 1, 0.05);
+    }
 
     for (let i = 0; i < count(500); i++) {
       const r = 2.5 + random() * 3.5;
@@ -563,12 +482,12 @@ void main() {
   float lit = 0.0;
 
   if (kind < 1.5) {
-    // Furnace body and lid: a hologram lit from below by the fire.
+    // Stationary steelwork and a skip car carrying glowing feed up the inclined tracks.
     normal = aAux;
     if (kind > 0.5) {
-      float spin = -t * 0.2;
-      p = rotY(aPos, spin) + vec3(0.0, sin(t * 0.8) * 0.025, 0.0);
-      normal = rotY(aAux, spin);
+      float cycle = 0.5 - 0.5 * cos(t * 0.55);
+      float lift = smoothstep(0.04, 0.96, cycle);
+      p = aPos + mix(vec3(-1.52, -1.2, -0.22), vec3(-0.37, 1.55, -0.22), lift);
     }
     lit = 1.0;
     float warm = 1.0 - smoothstep(-0.95, 0.15, p.y);
@@ -580,15 +499,7 @@ void main() {
       alpha = 0.7;
       size = 0.025;
     }
-    if (accent > 1.5) {
-      // The trigrams light one after another around the belly.
-      float glow = exp(-mod(t * 1.1 - (accent - 2.0), 8.0) * 1.3);
-      color = mix(GOLD, WHITE, glow * 0.8);
-      alpha = 0.5 + glow;
-      size = 0.026 + glow * 0.012;
-      lit = 0.4;
-    }
-    float scan = p.y - mix(-1.45, 1.4, fract(t / 6.5));
+    float scan = p.y - mix(-1.45, 1.8, fract(t / 6.5));
     scan = exp(-scan * scan * 256.0);
     color = mix(color, WHITE, scan * 0.6);
     alpha += scan * 0.8;
@@ -602,12 +513,12 @@ void main() {
     alpha = smoothstep(0.0, 0.08, life) * pow(1.0 - life, 1.3) * (accent > 0.5 ? 0.55 : 0.85);
     size = mix(0.06, 0.018, life);
   } else if (kind < 3.5) {
-    // Data: packets spiral inward, faster as they near the furnace, and drop under the lid.
+    // Data packets spiral into the charging hopper at the top of the shaft.
     float u = fract(t * aAux.y + aAux.z);
     float radius = 0.16 + (aPos.x - 0.16) * pow(1.0 - u, 1.5);
     float angle = aPos.y + aAux.x * TAU * pow(u, 1.6);
     vec2 lane = (vec2(hash(seed * 91.0), hash(seed * 57.0)) - 0.5) * (0.03 + radius * 0.025);
-    p = vec3(cos(angle) * radius, mix(aPos.z, 0.68, smoothstep(0.0, 0.95, u)) + lane.y, sin(angle) * radius);
+    p = vec3(cos(angle) * radius, mix(aPos.z, 1.64, smoothstep(0.0, 0.95, u)) + lane.y, sin(angle) * radius);
     p += vec3(-sin(angle), 0.0, cos(angle)) * lane.x;
     float bit = step(0.86, hash(seed * 17.0));
     color = mix(accent > 0.5 ? PURPLE : CYAN, WHITE, bit * 0.55);
@@ -635,13 +546,13 @@ void main() {
   } else if (kind < 5.5) {
     float life = fract(t * aAux.x + seed * 9.0);
     if (accent < 0.5) {
-      // Essence climbing from the knob to the pill.
+      // Model signals climbing from the charging tower to the suspended core.
       float angle = seed * TAU + life * 9.0;
-      float radius = 0.03 + 0.06 * sin(life * PI);
-      p = vec3(cos(angle) * radius + ${PILL_X} * life, 1.3 + life * ${(PILL_HEIGHT - 1.58).toFixed(2)}, sin(angle) * radius);
+      float radius = 0.07 + 0.1 * sin(life * PI);
+      p = vec3(cos(angle) * radius + ${PILL_X} * life, 1.67 + life * ${(PILL_HEIGHT - 1.85).toFixed(2)}, sin(angle) * radius);
       color = mix(GOLD, WHITE, life);
-      alpha = sin(life * PI) * 0.75;
-      size = 0.024;
+      alpha = sin(life * PI) * 0.6;
+      size = 0.022;
     } else {
       // Embers thrown up by the fire.
       vec3 spread = normalize(vec3(aPos.x, 0.0, aPos.z)) * 0.5;
@@ -652,7 +563,7 @@ void main() {
       size = 0.02;
     }
   } else if (kind < 6.5) {
-    // Floor: a dot matrix swept by a ripple, under a turning bagua array.
+    // Floor: a ripple crosses the casting floor and rotating process markings.
     p = rotY(aPos, t * aAux.x);
     float r = length(aPos.xz);
     if (accent < 0.5) {
@@ -673,16 +584,26 @@ void main() {
     color = mix(TEAL, CYAN, hash(seed * 3.0));
     alpha = 0.16 * (0.6 + 0.4 * sin(t * 1.4 + seed * 50.0));
     size = 0.018;
-  } else {
+  } else if (kind < 8.5) {
     // Panoramic data field: a travelling crest across layered rows of points.
     float crest = pow(0.5 + 0.5 * sin(aPos.x * 14.0 - t * 0.7 + aPos.y * 1.8), 8.0);
     color = mix(TEAL, accent < 0.5 ? CYAN : GOLD, 0.35 + crest * 0.5);
     alpha = (0.22 + crest * 0.42) * pow(1.0 - abs(aPos.y), 0.65);
     alpha *= 1.0 - smoothstep(0.0, 1.0, uMorph) * 0.8;
     size = 1.5 + crest * 0.9;
+  } else {
+    // Continuous molten iron runs downhill, with ripples travelling toward the runner's lip.
+    float flow = fract(aPos.x + t * aAux.x);
+    p = mix(vec3(0.0, -1.035, 0.72), vec3(0.86, -1.245, 1.5), flow);
+    p.x += aPos.y;
+    p.y += sin(flow * 26.0 - t * 5.0 + seed * 20.0) * 0.016;
+    p.z += (aPos.z - 0.5) * 0.06;
+    color = mix(WHITE, FLAME, 0.35 + flow * 0.6);
+    alpha = 0.45 + 0.2 * sin(t * 8.0 + seed * 25.0);
+    size = 0.024 + 0.008 * hash(seed * 31.0);
   }
 
-  if (kind < 5.5) {
+  if (kind < 5.5 || kind > 8.5) {
     // Scroll refines the furnace into a network: each dot bursts out, then settles.
     float m = clamp(uMorph * 1.7 - seed * 0.7, 0.0, 1.0);
     m = m * m * (3.0 - 2.0 * m);
@@ -720,7 +641,7 @@ void main() {
   vec3 v = rotX(rotY(p - uFocus, uYaw), uPitch);
   float persp = DISTANCE / max(0.6, DISTANCE - v.z);
   vec2 screen = uCenter + vec2(v.x, -v.y) * persp * uUnit;
-  if (kind > 7.5) {
+  if (kind > 7.5 && kind < 8.5) {
     float x = fract(aPos.x + t * (accent < 0.5 ? 0.004 : -0.003));
     float ridge = accent < 0.5
       ? 0.17 + 0.08 * sin(x * 5.0 - t * 0.08)
@@ -740,7 +661,7 @@ void main() {
     alpha *= mix(1.0, shade, lit);
   }
   alpha *= clamp(1.0 + (persp - 1.0) * 2.2, 0.35, 1.5);
-  float pixels = kind > 7.5 ? size * uPixel : size * persp * uUnit;
+  float pixels = kind > 7.5 && kind < 8.5 ? size * uPixel : size * persp * uUnit;
   float minimum = 1.4 * uPixel;
   if (pixels < minimum) {
     alpha *= pixels / minimum;
@@ -977,6 +898,7 @@ void main() {
     [
       [0, -1.05, 0, 1.7, 0.55, [1, 0.42, 0.14], 0.3 * flicker * furnaceLight],
       [0, -0.55, 0, 0.95, 1, [1, 0.5, 0.18], 0.2 * flicker * furnaceLight],
+      [0.6, -1.22, 1.3, 0.8, 0.3, [1, 0.3, 0.06], 0.16 * flicker * furnaceLight],
       [PILL_X, pillY, 0, 1.5, 1, [1, 0.72, 0.36], 0.26 * pulse * furnaceLight],
       [PILL_X, pillY, 0, 0.45, 1, [1, 0.94, 0.8], 0.6 * pulse * furnaceLight],
       [0, FLOOR, 0, 2.6, 0.3, [0.3, 0.75, 0.7], 0.1 * furnaceLight],
@@ -1103,7 +1025,7 @@ void main() {
       /* Private browsing may refuse storage; the switch still applies to this visit. */
     }
     document.getElementById("scene-status").textContent =
-      mode === "3d" ? "已切换为 3D 点阵八卦炉" : "已切换为像素丹炉";
+      mode === "3d" ? "已切换为 3D 点阵工业高炉" : "已切换为像素丹炉";
     window.dispatchEvent(new CustomEvent("aichemy-scene", { detail: { mode } }));
   }
 
