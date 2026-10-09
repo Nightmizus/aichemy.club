@@ -225,7 +225,13 @@
     const width = window.innerWidth;
     const height = window.innerHeight;
     const homeTop =
-      parseFloat(title.style.getPropertyValue("--title-home-top")) ||
+      parseFloat(
+        title.style.getPropertyValue(
+          document.documentElement.classList.contains("furnace-3d")
+            ? "--title-3d-home-top"
+            : "--title-home-top",
+        ),
+      ) ||
       height * 0.27;
     // Follow the page at full size until the title reaches the viewport's top.
     // Only the remaining scroll distance drives the move into the left slot.
