@@ -16,6 +16,8 @@
   const TAU = Math.PI * 2;
   const DISTANCE = 7;
   const FLOOR = -1.35;
+  const PILL_HEIGHT = 2.1;
+  const PILL_X = 0.12;
   const FRONT = Math.PI / 2;
   const STRIDE = 13; // position 3, aux 3, network target 3, meta 4
   // Trigram lines from bottom to top, in the 先天 order around the circle.
@@ -33,7 +35,7 @@
   const ANCHORS = {
     data: [1.95, 0.55, 0.5],
     fire: [-0.5, -1.12, 0.45],
-    pill: [0.36, 2.5, 0],
+    pill: [0.36 + PILL_X, PILL_HEIGHT, 0],
   };
   let mode = root.classList.contains("furnace-3d") ? "3d" : "pixel";
 
@@ -107,7 +109,7 @@
   function build(quality) {
     seed = 20260926;
     const data = [];
-    // Kinds: 0 furnace, 1 lid, 2 fire, 3 data, 4 pill, 5 rising sparks, 6 floor, 7 dust.
+    // Kinds: 0 furnace, 1 lid, 2 fire, 3 data, 4 pill, 5 sparks, 6 floor, 7 dust, 8 field.
     const add = (kind, x, y, z, a = 0, b = 0, c = 0, accent = 0) =>
       data.push(x, y, z, a, b, c, 0, 0, 0, kind, random(), accent, -1);
     const gap = 0.034 / Math.sqrt(quality);
@@ -424,6 +426,23 @@
       add(7, Math.cos(a) * r, -1.2 + random() * 4.2, Math.sin(a) * r);
     }
 
+    // Two continuous particle surfaces span the viewport, independently of the furnace scale.
+    // Their open center leaves the title legible while connecting the outer instruments.
+    const fieldColumns = Math.round(160 * Math.sqrt(quality));
+    const fieldRows = Math.round(22 * Math.sqrt(quality));
+    for (let band = 0; band < 2; band++) {
+      for (let row = 0; row <= fieldRows; row++) {
+        for (let col = 0; col <= fieldColumns; col++) {
+          add(
+            8,
+            (col + (row % 2) * 0.5) / fieldColumns,
+            row / fieldRows * 2 - 1,
+            random(), 0, 0, 0, band,
+          );
+        }
+      }
+    }
+
     // Network targets: five layers along x, each node joined to four nearest nodes ahead.
     const nodes = [];
     [5, 8, 10, 8, 5].forEach((total, layer) => {
@@ -596,7 +615,7 @@ void main() {
     size = 0.022 + bit * 0.012;
   } else if (kind < 4.5) {
     // The pill: a breathing golden sphere with two armillary rings.
-    vec3 center = vec3(0.0, 2.5 + sin(t * 0.9) * 0.05, 0.0);
+    vec3 center = vec3(${PILL_X}, ${PILL_HEIGHT} + sin(t * 0.9) * 0.05, 0.0);
     if (accent < 0.5) {
       vec3 dir = rotY(aPos, t * 0.35);
       float band = 0.5 + 0.5 * sin(dir.y * 16.0 - t * 2.4);
@@ -619,7 +638,7 @@ void main() {
       // Essence climbing from the knob to the pill.
       float angle = seed * TAU + life * 9.0;
       float radius = 0.03 + 0.06 * sin(life * PI);
-      p = vec3(cos(angle) * radius, 1.3 + life * 0.92, sin(angle) * radius);
+      p = vec3(cos(angle) * radius + ${PILL_X} * life, 1.3 + life * ${(PILL_HEIGHT - 1.58).toFixed(2)}, sin(angle) * radius);
       color = mix(GOLD, WHITE, life);
       alpha = sin(life * PI) * 0.75;
       size = 0.024;
@@ -648,12 +667,19 @@ void main() {
       size = 0.021;
     }
     alpha *= 1.0 - uMorph;
-  } else {
+  } else if (kind < 7.5) {
     // Dust drifting through the room.
     p = aPos + vec3(sin(t * 0.13 + seed * 20.0), sin(t * 0.17 + seed * 13.0) * 0.5, cos(t * 0.11 + seed * 17.0)) * 0.25;
     color = mix(TEAL, CYAN, hash(seed * 3.0));
     alpha = 0.16 * (0.6 + 0.4 * sin(t * 1.4 + seed * 50.0));
     size = 0.018;
+  } else {
+    // Panoramic data field: a travelling crest across layered rows of points.
+    float crest = pow(0.5 + 0.5 * sin(aPos.x * 14.0 - t * 0.7 + aPos.y * 1.8), 8.0);
+    color = mix(TEAL, accent < 0.5 ? CYAN : GOLD, 0.35 + crest * 0.5);
+    alpha = (0.22 + crest * 0.42) * pow(1.0 - abs(aPos.y), 0.65);
+    alpha *= 1.0 - smoothstep(0.0, 1.0, uMorph) * 0.8;
+    size = 1.5 + crest * 0.9;
   }
 
   if (kind < 5.5) {
@@ -694,6 +720,17 @@ void main() {
   vec3 v = rotX(rotY(p - uFocus, uYaw), uPitch);
   float persp = DISTANCE / max(0.6, DISTANCE - v.z);
   vec2 screen = uCenter + vec2(v.x, -v.y) * persp * uUnit;
+  if (kind > 7.5) {
+    float x = fract(aPos.x + t * (accent < 0.5 ? 0.004 : -0.003));
+    float ridge = accent < 0.5
+      ? 0.17 + 0.08 * sin(x * 5.0 - t * 0.08)
+      : 0.74 + 0.09 * sin(x * 4.5 + 0.5 + t * 0.06);
+    float spread = 0.05 + 0.035 * sin(x * PI + 0.4);
+    float wave = sin(x * 12.0 + aPos.y * 2.0 - t * 0.22) * 0.016;
+    screen = vec2(x, ridge + aPos.y * spread + wave) * uRes;
+    screen += vec2(sin(seed * 30.0), cos(seed * 41.0)) * uPixel * 0.35;
+    alpha *= smoothstep(0.0, 0.04, x) * (1.0 - smoothstep(0.96, 1.0, x));
+  }
   gl_Position = vec4(screen.x / uRes.x * 2.0 - 1.0, 1.0 - screen.y / uRes.y * 2.0, 0.0, 1.0);
   if (lit > 0.0) {
     // Hologram rim light: edges glow, the far side fades.
@@ -703,7 +740,7 @@ void main() {
     alpha *= mix(1.0, shade, lit);
   }
   alpha *= clamp(1.0 + (persp - 1.0) * 2.2, 0.35, 1.5);
-  float pixels = size * persp * uUnit;
+  float pixels = kind > 7.5 ? size * uPixel : size * persp * uUnit;
   float minimum = 1.4 * uPixel;
   if (pixels < minimum) {
     alpha *= pixels / minimum;
@@ -847,9 +884,8 @@ void main() {
       e,
       yaw: Math.sin(time * 0.16) * 0.45 + pointer.x,
       pitch: 0.32 - e * 0.2 + pointer.y,
-      // Offset the original scene as a whole; return to center behind the content.
-      cx: W * (0.5 + (portrait ? 0.06 : 0.14) * (1 - e)),
-      cy: H * (0.62 - e * 0.15),
+      cx: W * (0.5 + (portrait ? 0.05 : 0.16) * (1 - e)),
+      cy: H * (0.59 - e * 0.12),
       focus: [0, -0.03 * (1 - e), 0],
     };
   }
@@ -885,7 +921,10 @@ void main() {
       canvas.height = H;
     }
     portrait = height > width * 1.05;
-    unit = Math.min(H * 0.172, W * (portrait ? 0.4 : 0.3));
+    // The previous size is a floor: enlarge the stage rather than fitting the furnace down.
+    unit =
+      Math.min(H * 0.172, W * (portrait ? 0.4 : 0.3)) *
+      (portrait ? 1.02 : 1.12);
     const next = width * height < 600000 ? 0.6 : 1;
     if (next !== quality) {
       quality = next;
@@ -914,16 +953,32 @@ void main() {
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
     for (let i = 1; i < 4; i++) gl.disableVertexAttribArray(i);
     gl.uniform2f(glow.uniforms.uRes, W, H);
+    // Broad atmospheric light fills the room without flattening the bright furnace.
+    const atmosphere = (0.3 + shown * 0.7) * (1 - view.e * 0.8);
+    [
+      [0.13, 0.27, 0.55, 0.45, [0.12, 0.42, 0.32]],
+      [0.78, 0.65, 0.48, 0.55, [0.4, 0.25, 0.1]],
+    ].forEach(([x, y, rx, ry, color]) => {
+      gl.uniform2f(glow.uniforms.uCenter, W * x, H * y);
+      gl.uniform2f(glow.uniforms.uRadius, W * rx, H * ry);
+      gl.uniform3f(
+        glow.uniforms.uColor,
+        color[0] * 0.18 * atmosphere,
+        color[1] * 0.18 * atmosphere,
+        color[2] * 0.18 * atmosphere,
+      );
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    });
     const flicker =
       0.85 + Math.sin(time * 7.3) * 0.08 + Math.sin(time * 13.1) * 0.05;
     const pulse = 0.8 + Math.sin(time * 1.8) * 0.2;
-    const pillY = 2.5 + Math.sin(time * 0.9) * 0.05;
+    const pillY = PILL_HEIGHT + Math.sin(time * 0.9) * 0.05;
     const furnaceLight = (1 - view.e) * shown;
     [
       [0, -1.05, 0, 1.7, 0.55, [1, 0.42, 0.14], 0.3 * flicker * furnaceLight],
       [0, -0.55, 0, 0.95, 1, [1, 0.5, 0.18], 0.2 * flicker * furnaceLight],
-      [0, pillY, 0, 1.5, 1, [1, 0.72, 0.36], 0.26 * pulse * furnaceLight],
-      [0, pillY, 0, 0.45, 1, [1, 0.94, 0.8], 0.6 * pulse * furnaceLight],
+      [PILL_X, pillY, 0, 1.5, 1, [1, 0.72, 0.36], 0.26 * pulse * furnaceLight],
+      [PILL_X, pillY, 0, 0.45, 1, [1, 0.94, 0.8], 0.6 * pulse * furnaceLight],
       [0, FLOOR, 0, 2.6, 0.3, [0.3, 0.75, 0.7], 0.1 * furnaceLight],
       [0, 0, 0, 3.2, 0.8, [0.55, 0.42, 0.9], 0.14 * view.e],
     ].forEach(([x, y, z, radius, squash, color, strength]) => {

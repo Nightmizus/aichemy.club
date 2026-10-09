@@ -230,10 +230,10 @@
     const narrow = width <= 700;
     const homeLeft = Math.max(
       narrow ? 22 : 32,
-      width * (narrow ? 0.055 : 0.08),
+      width * (narrow ? 0.055 : 0.06),
     );
     const homeTop = is3d
-      ? Math.max(86, height * (narrow ? 0.14 : 0.3))
+      ? Math.max(100, height * (narrow ? 0.16 : 0.29))
       : parseFloat(title.style.getPropertyValue("--title-home-top")) ||
         height * 0.27;
     // Follow the page at full size until the title reaches the viewport's top.

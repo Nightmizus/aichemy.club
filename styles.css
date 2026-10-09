@@ -265,6 +265,17 @@ body {
 .furnace-3d .scene {
   background: transparent;
 }
+.furnace-3d .scene::before {
+  content: "";
+  position: absolute;
+  inset: 28px 32px;
+  pointer-events: none;
+  background:
+    linear-gradient(#9de1e855, #9de1e855) left top / 28px 1px no-repeat,
+    linear-gradient(#9de1e855, #9de1e855) left top / 1px 28px no-repeat,
+    linear-gradient(#ffce8555, #ffce8555) right bottom / 28px 1px no-repeat,
+    linear-gradient(#ffce8555, #ffce8555) right bottom / 1px 28px no-repeat;
+}
 /* Callouts pinned to the 3D furnace by furnace3d.js: 料, 火 and 丹. */
 .furnace-3d .hero-3d-tags {
   position: fixed;
@@ -478,9 +489,34 @@ a {
     0 0 9px #08150d;
 }
 /* The 3D hero uses the left side for a two-line title and the right for the furnace. */
+.hero-kicker {
+  display: none;
+}
+.furnace-3d .hero-kicker {
+  position: absolute;
+  top: -30px;
+  left: 0;
+  display: block;
+  padding-left: 22px;
+  color: #9de1e8;
+  opacity: var(--subtitle-opacity, 1);
+  font: 10px/1.2 "Courier New", monospace;
+  letter-spacing: 3px;
+  white-space: nowrap;
+}
+.hero-kicker::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  background: #9de1e8;
+  box-shadow: 0 0 12px #9de1e866;
+}
 .furnace-3d .hero-title-space {
-  top: var(--title-y, 30svh);
-  left: var(--title-x, 8vw);
+  top: var(--title-y, 29svh);
+  left: var(--title-x, 6vw);
   transform: scale(var(--title-scale, 1));
   transform-origin: left top;
   text-align: left;
@@ -490,6 +526,7 @@ a {
   display: block;
   width: var(--title-heading-width, 3.5em);
   height: var(--title-heading-height, calc(2em + 13px));
+  font-size: clamp(80px, 7.2vw, 128px);
 }
 .furnace-3d .title-cn,
 .furnace-3d .title-en {
@@ -503,20 +540,31 @@ a {
   transform: translate(var(--title-en-x, 0px), var(--title-en-y, calc(1em + 13px)));
 }
 .furnace-3d .hud-training {
-  left: 8%;
-  top: 14%;
+  left: 6%;
+  top: 10%;
 }
 .furnace-3d .hud-loss {
   right: 5%;
   top: 27%;
 }
 .furnace-3d .hud-compute {
-  left: 8%;
-  bottom: 23%;
+  left: 6%;
+  bottom: 25%;
 }
 .furnace-3d .hud-data {
   right: 5%;
   bottom: 22%;
+}
+@media (min-width: 1101px) and (min-height: 551px) {
+  .furnace-3d .scene-nav {
+    left: 6%;
+    bottom: 48px;
+    width: min(640px, 47%);
+    transform: none;
+  }
+  .furnace-3d .nav-body svg {
+    display: none;
+  }
 }
 /* The full-viewport canvas is unchanged. All interface elements are separate overlays. */
 .console-dock,
@@ -1601,6 +1649,15 @@ a {
   .furnace-3d .hero-title-space h1 {
     font-size: 40px;
   }
+  .furnace-3d .hero-kicker {
+    top: -24px;
+    padding-left: 14px;
+    font-size: 8px;
+    letter-spacing: 1px;
+  }
+  .furnace-3d .scene::before {
+    inset: 12px;
+  }
   .furnace-3d .hero-title-space p {
     max-width: 160px;
     font-size: 14px;
@@ -1615,24 +1672,34 @@ a {
     font-size: 10px;
     letter-spacing: 0.5px;
   }
+  .tag-fire::after {
+    width: 81px;
+    transform: rotate(-117deg);
+  }
+  .tag-fire > span {
+    bottom: 72px;
+  }
   .furnace-3d .hud-training {
     left: 4%;
-    top: 35%;
+    top: max(32%, 232px);
   }
   .furnace-3d .hud-loss {
     right: 4%;
-    top: 46%;
+    top: max(32%, 232px);
   }
   .furnace-3d .hud-compute {
     left: 4%;
-    bottom: 26%;
+    bottom: 146px;
   }
   .furnace-3d .hud-data {
     right: 4%;
-    bottom: 24%;
+    bottom: 146px;
   }
 }
 @media (max-height: 550px) and (orientation: landscape) {
+  .furnace-3d .hero-title-space h1 {
+    font-size: 40px;
+  }
   .furnace-3d .hud-training {
     left: 33%;
     top: 12%;
@@ -1646,6 +1713,25 @@ a {
   }
   .furnace-3d .hud-compute {
     left: 34%;
+  }
+}
+@media (max-width: 360px) {
+  .tag-fire::after {
+    width: 107px;
+    transform: rotate(-110deg);
+  }
+  .tag-fire > span {
+    bottom: 100px;
+  }
+  .tag-pill::after {
+    width: 10px;
+  }
+  .tag-pill > span {
+    left: 8px;
+    bottom: 6px;
+    padding-inline: 6px;
+    font-size: 9px;
+    letter-spacing: 0;
   }
 }
 @media (prefers-reduced-motion: reduce) {
