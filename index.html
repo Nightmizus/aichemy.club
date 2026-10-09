@@ -20,9 +20,9 @@
     <script>
       // Apply the saved hero style before first paint. ?scene= previews without saving.
       try {
-        const scene =
-          new URLSearchParams(location.search).get("scene") ||
-          localStorage.getItem("aichemy-scene");
+        const queryScene = new URLSearchParams(location.search).get("scene");
+        const savedScene = localStorage.getItem("aichemy-scene");
+        const scene = queryScene || savedScene || "3d";
         if (scene === "3d")
           document.documentElement.classList.add("furnace-3d");
       } catch {}

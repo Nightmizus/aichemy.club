@@ -1,6 +1,6 @@
 # AIchemy 部署状态
 
-核对时间：2026-10-08 08:48（America/Denver）。
+核对时间：2026-10-08 19:13（America/Denver）。
 
 服务器部署已完成。`aichemy.club` 尚未正式开放：域名已正确解析，但用户确认尚未完成 ICP 备案，阿里云实际返回 `403 / Non-compliance ICP Filing`。HTTPS 尚未签发，443 尚未监听。
 
@@ -11,15 +11,15 @@
 | 服务器 | `39.106.77.105` |
 | IP 临时预览 | `http://39.106.77.105/` |
 | 正式目标 | `https://aichemy.club/` |
-| 版本 | `20261008T144141Z` |
-| 发布目录 | `/var/www/aichemy/releases/20261008T144141Z` |
+| 版本 | `20261009T010217Z` |
+| 发布目录 | `/var/www/aichemy/releases/20261009T010217Z` |
 | 当前软链接 | `/var/www/aichemy/current` |
 | 部署前备份 | `/var/backups/aichemy/pre-deploy-20260926T081833Z` |
 | 服务器发布记录 | 上述备份目录内的 `deployment-status.json`、`release-manifest.json` |
-| 本地发布包 | `/tmp/aichemy-20261008T144141Z.tar.gz` |
-| 本地验收截图与补丁 | `/tmp/aichemy-deploy-20261008T144141Z/` |
+| 本地发布包 | `/tmp/aichemy-20261009T010217Z.tar.gz` |
+| 本地验收截图与补丁 | `/tmp/aichemy-deploy-20261009T010217Z/` |
 
-发布包 SHA-256：`153a81aae99131c07e750890c58b9f6da02ae340a6a2d77dbaffef7a16a5c42d`。
+发布包 SHA-256：`c2d03eb39540f2f764f50ba3d0fe60cdc2ff2f4c5af8854903170379617f6e14`。
 
 只发布官网 HTML、CSS、JS、favicon、字体及授权文件、微信二维码原图，共 11 个文件。发布副本的 9 个资源引用改为 `/club-assets/`，CSS 与脚本版本号使用本次版本。源码仍使用本地相对地址；未上传开发服务器、海报、文档或凭据。
 
@@ -29,6 +29,7 @@
 - 2026-09-29 内容更新已发布：服务列表新增 `./hatchery`，名称为“炼丹社 Hatchery AI 建站”，链接至 Hatchery 服务入口。
 - 2026-09-29 内容更新已发布：Hatchery 服务条目的状态按钮改为“敬请期待”。
 - 2026-10-08 内容更新已发布：新增 PIXEL / 3D 首屏切换，3D 点阵八卦炉脚本随官网资源部署。
+- 2026-10-08 内容更新已发布：首次打开且没有保存样式偏好时，首页默认进入 3D 模式；选择 PIXEL 后仍会保存用户偏好。
 - 当前 Nginx 配置和 `/etc/nginx/hatchery-https.template` 同步加入官网首页及 `/club-assets/`；原 Hatchery 根资源、API、预览、子域名代理保留。修改前实际配置哈希与交接快照一致。
 - 11 个远程发布文件逐一通过 SHA-256 校验。官网 HTML/JS/CSS、字体、二维码和 favicon 内容及类型正确。
 - `/` 为官网；`/club-assets/styles.css` 为官网样式；`/styles.css` 仍是 Hatchery 样式。缺失官网资源返回 404，`/.env` 返回 403。
