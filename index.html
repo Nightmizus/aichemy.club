@@ -27,7 +27,7 @@
           document.documentElement.classList.add("furnace-3d");
       } catch {}
     </script>
-    <link rel="stylesheet" href="./styles.css?v=phone-1" />
+    <link rel="stylesheet" href="./styles.css?v=mascot-news-1" />
     <script src="./furnace.js?v=phone-1" defer></script>
     <script src="./furnace3d.js?v=phone-1" defer></script>
     <script src="./app.js?v=panorama-1" defer></script>
@@ -57,8 +57,8 @@
                 ><span class="site-label-short">服务</span></a
               >
               <a href="#activities"
-                ><span class="site-label-full">社团活动</span
-                ><span class="site-label-short">活动</span></a
+                ><span class="site-label-full">资讯与活动</span
+                ><span class="site-label-short">资讯</span></a
               >
               <a href="#join"
                 ><span class="site-label-full">加入社团</span
@@ -124,8 +124,8 @@
               ><svg viewBox="0 0 32 32" aria-hidden="true">
                 <path d="M4 7h15v12H9l-5 5zM22 11h6v15l-5-4h-9M9 12h5" /></svg
               ><span
-                ><strong>社团活动</strong
-                ><small>交流 · 分享 · 共创</small></span
+                ><strong>资讯与活动</strong
+                ><small>新鲜事 · 一起参与</small></span
               ><span class="nav-arrow" aria-hidden="true">↓</span></span
             ></a
           >
@@ -350,22 +350,47 @@
           aria-labelledby="activities-title"
         >
           <div class="section-heading">
-            <span class="section-index">02 / ACTIVITIES</span>
-            <h2 id="activities-title">社团活动</h2>
-            <p>交流 · 分享 · 共创</p>
+            <span class="section-index">02 / NEWS &amp; EVENTS</span>
+            <h2 id="activities-title">资讯与活动</h2>
+            <p>社团新鲜事，一起分享</p>
           </div>
-          <ul class="section-list" aria-label="活动列表">
-            <li class="section-panel">
-              <svg class="section-icon" viewBox="0 0 48 48" aria-hidden="true">
-                <path
-                  d="M5 8h25v21H14L5 38zM35 16h8v25l-8-7H23M12 16h11M12 22h7"
-                />
-              </svg>
-              <div>
-                <h3>下一场活动</h3>
-                <p>活动主题、时间与地点待补充</p>
-              </div>
-              <span class="placeholder-status">待公布</span>
+          <ul class="section-list" aria-label="资讯与活动列表">
+            <li>
+              <article class="news-article" id="mascot-news" aria-labelledby="mascot-news-title">
+                <header class="news-header">
+                  <span class="news-category">社团资讯</span>
+                  <h3 id="mascot-news-title">炼丹社社娘形象与周边</h3>
+                  <p>炼丹社的社娘来啦！先和大家分享三张形象图，也把这份可爱做成了能随身携带的小周边。</p>
+                </header>
+                <div class="news-giveaway">
+                  <p>社娘吧唧和闪卡<strong>免费发放</strong>，数量有限。</p>
+                  <ul class="merch-quantities" aria-label="周边发放数量">
+                    <li><span>吧唧</span><strong>25 <small>个</small></strong><span>限量 · 免费</span></li>
+                    <li><span>闪卡</span><strong>50 <small>个</small></strong><span>限量 · 免费</span></li>
+                  </ul>
+                </div>
+                <div class="mascot-gallery" aria-label="社娘形象图">
+                  <figure>
+                    <a href="./assets/mascot/1-neon-sticker.jpg" target="_blank" rel="noopener" aria-label="查看社娘花间形象原图">
+                      <img src="./assets/mascot/1-neon-sticker.jpg" width="1280" height="1826" alt="浅紫发猫耳社娘置身玫瑰花间，手持一枝玫瑰" loading="lazy" decoding="async" />
+                    </a>
+                    <figcaption>01 / 花间</figcaption>
+                  </figure>
+                  <figure>
+                    <a href="./assets/mascot/2-neon-sticker.jpg" target="_blank" rel="noopener" aria-label="查看社娘霓虹形象第一张原图">
+                      <img src="./assets/mascot/2-neon-sticker.jpg" width="1280" height="1600" alt="霓虹色彩的猫耳社娘，抬手指向右上方，背景为彩色几何图案" loading="lazy" decoding="async" />
+                    </a>
+                    <figcaption>02 / 霓虹</figcaption>
+                  </figure>
+                  <figure>
+                    <a href="./assets/mascot/3-watercolor-full.jpg" target="_blank" rel="noopener" aria-label="查看社娘霓虹形象第二张原图">
+                      <img src="./assets/mascot/3-watercolor-full.jpg" width="1280" height="1600" alt="彩色猫耳社娘形象，背景点缀猫咪图案与绚丽色块" loading="lazy" decoding="async" />
+                    </a>
+                    <figcaption>03 / 缤纷</figcaption>
+                  </figure>
+                </div>
+                <p class="news-image-note">点击图片查看原图</p>
+              </article>
             </li>
           </ul>
           <a class="back-link" href="#top">↑ 返回实验室</a>
