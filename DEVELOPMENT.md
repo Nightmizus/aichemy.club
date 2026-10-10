@@ -35,7 +35,7 @@ npm run dev
 
 - 首屏 `#top`：全屏 Canvas 高炉场景，标题为“炼丹社 AIchemy”，副标题为“硬核AI研究社团@sdsz”。
 - `#services`：服务列表当前有 `./hatchery`，显示“炼丹社 Hatchery AI 建站”，链接到现有 Hatchery 入口。
-- `#activities`：资讯与活动板块，已有资讯 `#mascot-news`「炼丹社社娘形象与周边」。三张用户提供的 JPG 原图存于 `assets/mascot/`，完整展示并支持打开原图；吧唧免费发放、限量 25 个，闪卡免费发放、限量 50 个。尚未提供发放时间或地点，页面不作补充假设。
+- `#activities`：资讯与活动板块，首页列表入口 `#mascot-news` 只显示「炼丹社社娘形象与周边」标题和一句摘要，点击 `assets/news/mascot.html` 打开独立详情页。四张用户提供的 JPG 原图存于 `assets/mascot/`，在详情页完整展示并支持打开原图；吧唧免费发放、限量 25 个，闪卡免费发放、限量 50 个。尚未提供发放时间或地点，页面不作补充假设。
 - `#join`：社长微信二维码，原图完整显示，不要裁切或替换成重新生成的图片。
 - `#community`：友社和友链。友社是 `ht2.club`；友链顺序是 `groovin.cn`、`mizusumi.com`。
 
@@ -47,7 +47,7 @@ npm run dev
 
 ## 修改约定
 
-页面是纯静态源码。新增网页公开资源放入 `assets/`，源码里使用相对路径，例如 `./assets/example.png`；新增资讯使用 `assets/unifont-news.woff2` 补充像素字体字形，发布时需包含该字体及 `assets/mascot/` 三张图片；正式发布时打包脚本会把官网资源改为 `/club-assets/`。不要把 `poster/`、开发截图、文档或本地预览代码放进公开资源目录。
+页面是纯静态源码。新增网页公开资源放入 `assets/`，源码里使用相对路径，例如 `./assets/example.png`；新增资讯使用 `assets/unifont-news.woff2` 补充像素字体字形，发布时需包含该字体及 `assets/mascot/` 四张图片和 `assets/news/mascot.html` 详情页；正式发布时打包脚本会把官网资源改为 `/club-assets/`。详情页与图片一起放在 `assets/`，沿用现有递归打包流程；详情页的 `../../styles.css`、`../mascot/` 在本地与 `/club-assets/assets/news/` 下均能正确解析，返回链接为 `/#activities`，无需新增服务器路由。不要把 `poster/`、开发截图、文档或本地预览代码放进公开资源目录。
 
 官网和 Hatchery 共用同一台服务器。不要把首页所有未知路径改成官网兜底，也不要占用 `/api/`、`/gallery`、`/preview/` 等 Hatchery 路由。`./hatchery` 应继续指向服务器现有的 `/hatchery` 入口。涉及 Nginx 或发布包时，先阅读 `DEPLOYMENT.md`。
 

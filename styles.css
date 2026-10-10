@@ -1142,6 +1142,66 @@ a {
   font-size: 10px;
   white-space: nowrap;
 }
+.section-panel.news-entry {
+  grid-template-columns: minmax(0, 1fr) auto;
+  color: inherit;
+  text-decoration: none;
+}
+.news-entry:hover {
+  border-color: var(--section-accent);
+  background: #1b2523;
+}
+.news-entry h3 {
+  margin-top: 8px;
+  font-family: "AIchemy HUD", Arial, sans-serif;
+  line-height: 1.6;
+}
+.news-entry-arrow {
+  color: var(--section-accent);
+  font-size: 24px;
+}
+.news-entry:focus-visible,
+.news-page-nav a:focus-visible,
+.news-back-link:focus-visible {
+  outline: 2px solid var(--section-accent);
+  outline-offset: 4px;
+}
+.news-page {
+  --section-accent: #dabbff;
+  --section-rgb: 190 148 247;
+  background:
+    radial-gradient(ellipse at 0 0, #34304755, transparent 55%),
+    #111713;
+  color: #cdd8bc;
+}
+.news-page-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: min(1040px, calc(100% - 40px));
+  margin: auto;
+  padding: 24px 0;
+  border-bottom: 1px solid #62795240;
+}
+.news-home-link {
+  color: #eed7a1;
+  font: 20px/1.4 "AIchemy Pixel", monospace;
+  text-decoration: none;
+}
+.news-back-link {
+  color: var(--section-accent);
+  font-size: 13px;
+  line-height: 1.6;
+  text-underline-offset: 5px;
+}
+.news-page-main {
+  width: min(1040px, calc(100% - 40px));
+  margin: 32px auto 0;
+}
+.news-page-footer {
+  padding: 24px 0 40px;
+}
 .news-article {
   padding: clamp(16px, 3vw, 32px);
   border: 1px solid rgb(var(--section-rgb) / 0.3);
@@ -1154,7 +1214,7 @@ a {
   font-size: 12px;
   letter-spacing: 2px;
 }
-.news-header h3 {
+.news-header h1 {
   margin: 12px 0;
   color: #e9e5f0;
   font-size: clamp(20px, 2.2vw, 26px);
@@ -1205,7 +1265,7 @@ a {
 }
 .mascot-gallery {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
 }
 .mascot-gallery figure {
@@ -1242,6 +1302,20 @@ a {
   margin-top: 18px;
 }
 @media (max-width: 700px) {
+  .news-page-nav {
+    gap: 12px;
+    padding-block: 20px;
+  }
+  .news-home-link {
+    font-size: 18px;
+  }
+  .news-page-nav .news-back-link {
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .news-page-main {
+    margin-top: 20px;
+  }
   .mascot-gallery {
     grid-template-columns: minmax(0, 1fr);
     gap: 20px;
