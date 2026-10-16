@@ -49,7 +49,9 @@ npm run dev
 
 页面是纯静态源码。新增网页公开资源放入 `assets/`，源码里使用相对路径，例如 `./assets/example.png`；新增资讯使用 `assets/unifont-news.woff2` 补充像素字体字形，发布时需包含该字体及 `assets/mascot/` 四张图片和 `assets/news/mascot.html` 详情页；正式发布时打包脚本会把官网资源改为 `/club-assets/`。详情页与图片一起放在 `assets/`，沿用现有递归打包流程；详情页的 `../../styles.css`、`../mascot/` 在本地与 `/club-assets/assets/news/` 下均能正确解析，返回链接为 `/#activities`，无需新增服务器路由。不要把 `poster/`、开发截图、文档或本地预览代码放进公开资源目录。
 
-官网和 Hatchery 共用同一台服务器。不要把首页所有未知路径改成官网兜底，也不要占用 `/api/`、`/gallery`、`/preview/` 等 Hatchery 路由。`./hatchery` 应继续指向服务器现有的 `/hatchery` 入口。涉及 Nginx 或发布包时，先阅读 `DEPLOYMENT.md`。
+官网和 Hatchery 共用同一台服务器。不要把首页所有未知路径改成官网兜底，也不要占用 `/api/`、`/gallery`、`/preview/` 等 Hatchery 路由。涉及 Nginx 或发布包时，先阅读 `DEPLOYMENT.md`。
+
+**⚠️ 链接规则，禁止改回：** Hatchery 及其发布的站点一律使用二级域名绝对链接，不使用路径形式。源码里 `./hatchery` 是本地预览占位，打包脚本会将其改写为 `https://hatchery.aichemy.club/`；Hatchery 发布的页面（如 `cogito.aichemy.club`）同理使用各自的二级域名链接。任何时候都不要把这些链接改回 `/hatchery`、`/pages/...` 或其他路径形式，无论是手动修改源码还是修改打包脚本。
 
 本地改动完成后，至少检查 JavaScript 语法：
 
@@ -62,9 +64,9 @@ npm run check
 ## 当前部署状态
 
 - IP 临时预览：<http://39.106.77.105/>
-- 当前发布版本：`20261009T010217Z`
+- 当前发布版本：`20261013T030327Z`，源码提交 `7838608`，2026-10-12 已同步并验收。
 - 官网源码发布到 `/var/www/aichemy/current`，Nginx 和 Hatchery 均正常运行。
-- `aichemy.club` 已解析到服务器，但用户确认尚未完成 ICP 备案；HTTP 会被阿里云备案拦截，HTTPS 证书和 443 尚未启用。
-- 不要把备案拦截误判为网页资源加载错误；正式域名恢复前用 IP 入口验收页面。
+- 四个域名当前均直连阿里云，HTTPS 已启用；`https://hatchery.aichemy.club/` 直接访问 Hatchery，200 正常。
+- Let's Encrypt 证书覆盖四个域名，已配置自动续期；正式官网 `https://aichemy.club/`、原 HTTP 与 IP 入口均可访问。DNS、HTTPS 及回滚记录见 `DEPLOYMENT-STATUS.md`。
 
 接手时先阅读本文件、`README.md` 和 `DEPLOYMENT-STATUS.md`。需要修改服务器或重新发布时，再完整阅读 `DEPLOYMENT.md`；部署凭据不保存在工作区。

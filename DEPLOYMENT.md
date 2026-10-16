@@ -2,7 +2,7 @@
 
 核对日期：2026-09-26。本文供后续接手部署的人或 AI 使用。
 
-**2026-10-08 更新：官网服务器部署已完成，正式域名仍待 ICP 备案及 HTTPS 启用。** 当前版本为 `20261009T010217Z`，`/var/www/aichemy/current` 已指向发布目录，四个域名已解析到 `39.106.77.105`。公网 IP 可预览官网，但域名访问被阿里云备案系统拦截。详细验收、备份和收尾步骤见 [当前部署状态](DEPLOYMENT-STATUS.md)。再次执行本手册前重新检查实际状态；不要重复执行首次安装步骤。
+**2026-10-12 更新：官网代码已同步，HTTPS 与 Hatchery 别名已修复。** 当前版本为 `20261013T030327Z`，源码提交为 `7838608`。四个域名均直连阿里云并使用可信证书；`https://hatchery.aichemy.club/` 跳转至 `https://aichemy.club/hatchery`，最终页面返回 200。现有 HTTP 与 IP 预览继续可用。详细验收、备份和证书现状见 [当前部署状态](DEPLOYMENT-STATUS.md)。再次执行本手册前重新检查实际状态；不要重复执行首次安装步骤。
 
 本手册的打包步骤已在本地实跑：9 个 HTML 资源引用和 CSS 内字体路径均有效，源码 HTML 未改动；所有 Bash 示例通过语法检查。官网首页、资源 alias、旧登录回跳及保留根路径代理的分工，已用隔离的本地 Nginx 和模拟后端响应检查通过。这些检查不代替服务器上线及正式 HTTPS 验收。
 
@@ -20,10 +20,10 @@
 | Hatchery 别名 | `hatchery.aichemy.club` 跳转到上述入口 |
 | 已恢复的发布站点 | `taffy.aichemy.club`、`m0nesy.aichemy.club` |
 | 官网源文件 | 当前工作区 `/mizusdev/AIchemy` |
-| 官网部署目录（待创建） | `/var/www/aichemy/releases/<版本>/`，`current` 软链接指向当前版本 |
+| 官网部署目录 | `/var/www/aichemy/releases/<版本>/`，`current` 软链接指向当前版本 |
 | Hatchery | `/opt/hatchery`，`hatchery.service`，监听 `127.0.0.1:4173` |
 | 生效中的 Nginx 站点 | `/etc/nginx/sites-available/hatchery`，由 `sites-enabled` 引用 |
-| 待启用的 HTTPS 配置模板 | `/etc/nginx/hatchery-https.template` |
+| HTTPS 配置模板（已与生效配置同步） | `/etc/nginx/hatchery-https.template` |
 
 SSH 密码由所有者私下提供，不写入仓库、命令示例或部署包。重装后已核对的 ED25519 主机指纹是 `SHA256:mP54AIqhmG477Yk4tPGbtWCFJsmtpRa99UuSZjpXlOU`；如果后续发生变化，先核对原因，不要直接关闭主机密钥检查。
 
@@ -59,7 +59,7 @@ cd /mizusdev/AIchemy
 npm run check
 ```
 
-只打包 `index.html`、`styles.css`、`app.js`、`furnace.js`、`furnace3d.js`、`favicon.svg` 和 `assets/`。当前这些文件合计约 367 KiB。字体授权文件随 `assets/` 保留；不上传 `poster/`、开发服务器、文档、`.git`、`.env` 或备份。新增资产后先检查 `assets/` 中仍全部是允许公开的文件。
+只打包 `index.html`、`styles.css`、`app.js`、`furnace.js`、`furnace3d.js`、`favicon.svg` 和 `assets/`。当前共 18 个文件，合计约 1.79 MiB，包含资讯详情页及五张社娘原图。字体授权文件随 `assets/` 保留；不上传 `poster/`、开发服务器、文档、`.git`、`.env` 或备份。新增资产后先检查 `assets/` 中仍全部是允许公开的文件。
 
 ```bash
 set -euo pipefail
@@ -73,18 +73,37 @@ import os
 import re
 import shutil
 from pathlib import Path
+from urllib.parse import urlsplit
 
 source = Path.cwd()
 staging = Path(os.environ['AICHEMY_STAGING'])
 for name in ('index.html', 'styles.css', 'app.js', 'furnace.js', 'furnace3d.js', 'favicon.svg'):
     shutil.copy2(source / name, staging / name)
 shutil.copytree(source / 'assets', staging / 'assets')
-index = staging / 'index.html'
-html = index.read_text(encoding='utf-8')
-html, count = re.subn(r'''((?:src|href)=["'])\./''', r'\1/club-assets/', html)
+count = 0
+def rewrite(match):
+    global count
+    prefix, quote, value = match.groups()
+    if value == './hatchery':
+        # Hatchery 使用二级域名入口，不使用路径形式。不许改回 /hatchery。
+        return prefix + quote + 'https://hatchery.aichemy.club/' + quote
+    if value.startswith('./'):
+        resource = staging / urlsplit(value).path[2:]
+        if not resource.is_file():
+            raise SystemExit(f'未找到公开资源：{value}')
+        value = '/club-assets/' + value[2:]
+        count += 1
+    parts = urlsplit(value)
+    if parts.path.endswith(('.css', '.js')):
+        value = parts.path + '?v=' + os.environ['AICHEMY_RELEASE']
+    return prefix + quote + value + quote
+
+for page in staging.rglob('*.html'):
+    html = re.sub(r'''(\b(?:src|href)\s*=\s*)(["'])(.*?)\2''', rewrite,
+                  page.read_text(encoding='utf-8'))
+    page.write_text(html, encoding='utf-8')
 if count == 0:
     raise SystemExit('未找到相对资源地址；请检查 HTML 后再发布')
-index.write_text(html, encoding='utf-8')
 print(f'已转换 {count} 个 HTML 资源引用，发布版本：{os.environ["AICHEMY_RELEASE"]}')
 PY
 
@@ -95,7 +114,7 @@ scp "$AICHEMY_ARCHIVE" "$AICHEMY_ARCHIVE.sha256" root@39.106.77.105:/tmp/
 printf '服务器步骤中的 AICHEMY_RELEASE 填写：%s\n' "$AICHEMY_RELEASE"
 ```
 
-转换只处理当前 HTML 的 `src`、`href` 相对地址。将来增加 `srcset`、CSS 内联图片或 JavaScript 动态加载资源时，需要相应更新发布流程；不要假定脚本会自动处理所有新引用。
+转换处理 HTML 的 `src`、`href`：官网资源使用 `/club-assets/`，`./hatchery` 改写为 `https://hatchery.aichemy.club/`（二级域名，不使用路径形式，不许改回 `/hatchery`），首页及详情页的 CSS/JS 使用发布版本号。详情页的 `../../styles.css` 与 `../mascot/` 保持相对路径。将来增加 `srcset`、CSS 内联图片或 JavaScript 动态加载资源时，需要相应更新发布流程；不要假定脚本会自动处理所有新引用。
 
 ## 4. 服务器准备与备份
 
@@ -234,11 +253,11 @@ curl --fail --silent --show-error -o /dev/null http://127.0.0.1:4173/
 | A | `taffy` | `39.106.77.105` |
 | A | `m0nesy` | `39.106.77.105` |
 
-本方案直接连接阿里云，不使用 Cloudflare Tunnel 或 Worker。若权威 DNS 仍在 Cloudflare，可以只保留其 DNS 管理，将这四条设为 DNS only（灰云），并清理这些名称冲突的旧 CNAME/A/AAAA。不要顺带删除其他业务的解析、Worker 或凭据。只修改配置文件或删除 Worker 都不等于完成 DNS 切换。
+2026-10-12 21:53 复核时四个名称已全部直接解析到阿里云，本次修复未修改 DNS 或 Cloudflare。已通过 HTTP-01 签发 `hatchery-aichemy` 证书并启用 HTTPS，四个域名均通过可信证书验证；原有 HTTP 行为保留。若以后启用 Cloudflare 代理，可使用 Full (strict)，并保持 `/.well-known/acme-challenge/` 可供证书自动续期访问。不要顺带删除其他业务的解析、Worker 或凭据。
 
 公网 80/443 已在前次部署中验证可达；应用 4173 保持仅回环监听。部署时重新检查安全组和本机防火墙，不需要开放 3000 或 4173。
 
-官网与 Hatchery 的 HTTP 验收通过、两份 Nginx 配置都修改后，若原先启用了 bootstrap timer 且尚未完成 HTTPS，则恢复任务：
+当前首次 HTTPS 已完成，`complete.json` 已写入，bootstrap timer 保持 disabled；后续由 enabled/active 的 `certbot.timer` 续期，续期 hook 检查并 reload Nginx。以下仅适用于尚未完成首次 HTTPS 的部署：官网与 Hatchery 的 HTTP 验收通过、两份 Nginx 配置都修改后，若原先启用了 bootstrap timer 且尚未完成 HTTPS，则恢复任务：
 
 ```bash
 if grep -qx enabled "$AICHEMY_BACKUP/bootstrap-enabled.txt" \
